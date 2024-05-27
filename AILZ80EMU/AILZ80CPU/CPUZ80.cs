@@ -14,6 +14,7 @@ namespace AILZ80CPU
         public Register Register { get; private set; }
         public IO IO { get; private set; }
 
+        public MachineCycleEnum MachineCycle { get; private set; }
         /// <summary>
         /// メモリリクエスト
         /// </summary>
@@ -65,6 +66,7 @@ namespace AILZ80CPU
             IO = new IO(256, bus);
             Bus = bus;
 
+            MachineCycle = MachineCycleEnum.M1_T1;
             //InstructionSet = new InstructionSet();
             //Clock = new Clock();
             //InterruptController = new InterruptController();
@@ -75,12 +77,35 @@ namespace AILZ80CPU
             base.ExecuteClock();
             // クロックで実行する
 
-            MREQ = false;
-            RD = false;
-            M1 = false;
+            switch (MachineCycle)
+            {
+                case MachineCycleEnum.M1_T1:
+                    Bus.Address = Register.PC;
 
+                    MREQ = false;
+                    RD = false;
+                    M1 = false;
+                    RFSH = false;
+                    break;
+                case MachineCycleEnum.M1_T2:
+                    break;
+                case MachineCycleEnum.M1_T3:
+                    break;
+                case MachineCycleEnum.M1_T4:
+                    break;
+                case MachineCycleEnum.M2_T1:
+                    break;
+                case MachineCycleEnum.M2_T2:
+                    break;
+                case MachineCycleEnum.M2_T3:
+                    break;
+                default:
+                    break;
+            }
             Bus.MREQ = MREQ;
             Bus.RD = RD;
+            Bus.M1 = M1;
+            Bus.RFSH = RFSH;
         }
 
         /*

@@ -31,5 +31,9 @@ namespace AILZ80LIB
         /// マシンサイクル1
         /// </summary>
         public bool M1 { get; set; }
+        /// <summary>
+        /// リフレッシュ
+        /// </summary>
+        public bool RFSH { get; set; }
     }
 }
