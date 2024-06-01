@@ -15,6 +15,7 @@ namespace AILZ80CPU
         public IO IO { get; private set; }
 
         public MachineCycleEnum MachineCycle { get; private set; }
+        public bool ClockState { get; private set; }
         /// <summary>
         /// メモリリクエスト
         /// </summary>
@@ -66,44 +67,84 @@ namespace AILZ80CPU
             IO = new IO(256, bus);
             Bus = bus;
 
-            MachineCycle = MachineCycleEnum.M1_T1;
+            Reset();
             //InstructionSet = new InstructionSet();
             //Clock = new Clock();
             //InterruptController = new InterruptController();
         }
 
-        public override void ExecuteClock()
+        public void Reset()
         {
-            base.ExecuteClock();
-            // クロックで実行する
+            MachineCycle = MachineCycleEnum.None;
+            MREQ = true;
+            RD = true;
+            WR = true;
+            M1 = true;
+            RFSH = true;
 
+            Bus.MREQ = MREQ;
+            Bus.RD = RD;
+            Bus.WR = WR;
+            Bus.M1 = M1;
+            Bus.RFSH = RFSH;
+        }
+
+        public override void ExecuteClock(bool clockState)
+        {
+            base.ExecuteClock(clockState);
+
+            // ステートを変更する
+            if (MachineCycle == MachineCycleEnum.None && clockState)
+            {
+                MachineCycle = MachineCycleEnum.M1_T1_H;
+            }
+            else
+            {
+                // ステートを変更する
+                if ((((int)MachineCycle & 1) == 1 && clockState) ||
+                    (((int)MachineCycle & 1) == 0 && !clockState))
+                {
+                    return;
+                }
+                MachineCycle = MachineCycle + 1;
+            }
+ 
+            // 実際の処理を動作させる
             switch (MachineCycle)
             {
-                case MachineCycleEnum.M1_T1:
+                case MachineCycleEnum.M1_T1_H:
                     Bus.Address = Register.PC;
-
+                    M1 = false;
+                    break;
+                case MachineCycleEnum.M1_T1_L:
                     MREQ = false;
                     RD = false;
-                    M1 = false;
+                    break;
+                case MachineCycleEnum.M1_T2_H:
+                    break;
+                case MachineCycleEnum.M1_T2_L:
+                    var data = Bus.Data;
+                    break;
+                case MachineCycleEnum.M1_T3_H:
+                    Bus.Address = (UInt16)(Register.R * 256);
+                    Register.R = (byte)((Register.R + 1) & 0x7F);
+                    MREQ = true;
+                    RD = true;
+                    M1 = true;
                     RFSH = false;
                     break;
-                case MachineCycleEnum.M1_T2:
+                case MachineCycleEnum.M1_T3_L:
+                    MREQ = false;
                     break;
-                case MachineCycleEnum.M1_T3:
+                case MachineCycleEnum.M1_T4_H:
                     break;
-                case MachineCycleEnum.M1_T4:
-                    break;
-                case MachineCycleEnum.M2_T1:
-                    break;
-                case MachineCycleEnum.M2_T2:
-                    break;
-                case MachineCycleEnum.M2_T3:
-                    break;
-                default:
+                case MachineCycleEnum.M1_T4_L:
+                    MREQ = true;
                     break;
             }
             Bus.MREQ = MREQ;
             Bus.RD = RD;
+            Bus.WR = WR;
             Bus.M1 = M1;
             Bus.RFSH = RFSH;
         }

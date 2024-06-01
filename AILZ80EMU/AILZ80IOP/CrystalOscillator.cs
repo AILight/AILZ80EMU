@@ -10,8 +10,8 @@ namespace AILZ80IOP
 {
     public class CrystalOscillator : Device
     {
-        public event Action? OnClockTick; // クロック信号を通知するイベント
-        public bool State { get; private set; }
+        public event Action<bool>? OnClockTick; // クロック信号を通知するイベント
+        public bool ClockState { get; private set; }
 
         private int Hertz { get; set; }
 
@@ -36,7 +36,7 @@ namespace AILZ80IOP
             base.PowerOn();
 
             // 初回起動処理
-            this.State = false;
+            this.ClockState = false;
             this.Stopwatch.Start();
             this.ElapsedTicks = this.Stopwatch.ElapsedTicks;
             this.NextIntervalTicks = this.ElapsedTicks + this.IntervalTicks;
@@ -63,7 +63,7 @@ namespace AILZ80IOP
             {
                 for (var index = this.IntervalCounter; index < 4; index++)
                 {
-                    this.OnClockTick?.Invoke();
+                    OnClockTick_Invoce();
                 }
                 this.NextIntervalTicks = this.ElapsedTicks + this.IntervalTicks;
                 this.NextInterval4Ticks = this.ElapsedTicks + this.Interval4Ticks;
@@ -74,13 +74,19 @@ namespace AILZ80IOP
             else if (this.ElapsedTicks > this.NextIntervalTicks && this.IntervalCounter < 3)
             {
                 this.IntervalCounter++;
-                this.OnClockTick?.Invoke();
+                OnClockTick_Invoce();
                 this.NextIntervalTicks = this.ElapsedTicks + this.IntervalTicks;
             }
             else
             {
                 Counter++;
             }
+        }
+
+        private void OnClockTick_Invoce()
+        {
+            this.ClockState = !this.ClockState;
+            this.OnClockTick?.Invoke(this.ClockState);
         }
     }
 }

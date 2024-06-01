@@ -11,7 +11,7 @@ namespace AILZ80CSL
 
             while (true)
             {
-                var state = board.CrystalOscillator4Mhz.State;
+                var state = board.CrystalOscillator4Mhz.ClockState;
                 board.Drive();
                 /*
                 if (state != board.CrystalOscillator4Mhz.State)

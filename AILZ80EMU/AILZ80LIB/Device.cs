@@ -28,7 +28,7 @@ namespace AILZ80LIB
         {
         }
 
-        public virtual void ExecuteClock()
+        public virtual void ExecuteClock(bool clockState)
         {
         }
 

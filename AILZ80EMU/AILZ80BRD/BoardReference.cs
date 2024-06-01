@@ -10,14 +10,17 @@ namespace AILZ80BRD
 
         public CrystalOscillator CrystalOscillator4Mhz { get; set; } = new CrystalOscillator(3993600);
         public CPUZ80 Z80 { get; set; }
-
+        public Memory MemoryMain { get; set; }
 
         public BoardReference()
         {
             Z80 = new CPUZ80(MainBus);
-            CrystalOscillator4Mhz.OnClockTick += () =>
+            MemoryMain = new Memory(64 * 1024, MainBus);
+
+            CrystalOscillator4Mhz.OnClockTick += (clockState) =>
             {
-                Z80.ExecuteClock();
+                Z80.ExecuteClock(clockState);
+                MemoryMain.ExecuteClock(clockState);
             };
         }
 
@@ -34,6 +37,7 @@ namespace AILZ80BRD
         {
             CrystalOscillator4Mhz.Drive();
             //CPU.Drive();
+            //MemoryMain.Drive();
         }
 
 
