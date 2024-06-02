@@ -55,12 +55,15 @@ namespace AILZ80CPU
         public byte Data { get; set; }
 
         private Bus Bus { get; set; }
+        
+        /*
         private byte OP1 { get; set; }
         private byte OP2 { get; set; }
         private byte RD1 { get; set; }
         private byte RD2 { get; set; }
         private byte WD1 { get; set; }
         private byte WD2 { get; set; }
+        */
 
         //public InstructionSet InstructionSet { get; private set; }
         //public Clock Clock { get; private set; }
@@ -77,6 +80,22 @@ namespace AILZ80CPU
             //InstructionSet = new InstructionSet();
             //Clock = new Clock();
             //InterruptController = new InterruptController();
+            var a = new OperationPack()
+            {
+                OPs = new byte[] { 0x00 },
+                EndMachineCycle = MachineCycleEnum.M1_T4_L
+            };
+            var b = new OperationPack()
+            {
+                OPs = new byte[] { 0x01 },
+                Actions = new Dictionary<MachineCycleEnum, Action>()
+                {
+                    [MachineCycleEnum.]
+                }
+                EndMachineCycle = MachineCycleEnum.M1_T4_L
+            };
+
+
         }
 
         public void Reset()

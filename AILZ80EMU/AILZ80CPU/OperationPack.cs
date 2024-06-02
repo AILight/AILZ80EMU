@@ -8,7 +8,9 @@ namespace AILZ80CPU
 {
     public class OperationPack
     {
-        public byte OP1 { get; set; }
-        public aaa
+        public byte[]? OPs { get; set; }
+        public Dictionary<MachineCycleEnum, Action>? Actions { get; set; }
+        public Dictionary<MachineCycleEnum, MachineCycleEnum>? NextMachineCycleDic { get; set; }
+        public MachineCycleEnum EndMachineCycle { get; set; }
     }
 }
