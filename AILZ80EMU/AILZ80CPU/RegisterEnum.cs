@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AILZ80CPU
 {
-    public enum RegisterType
+    public enum RegisterEnum
     {
         AF, BC, DE, HL,
         AF_S, BC_S, DE_S, HL_S,

@@ -55,6 +55,12 @@ namespace AILZ80CPU
         public byte Data { get; set; }
 
         private Bus Bus { get; set; }
+        private byte OP1 { get; set; }
+        private byte OP2 { get; set; }
+        private byte RD1 { get; set; }
+        private byte RD2 { get; set; }
+        private byte WD1 { get; set; }
+        private byte WD2 { get; set; }
 
         //public InstructionSet InstructionSet { get; private set; }
         //public Clock Clock { get; private set; }
@@ -114,6 +120,7 @@ namespace AILZ80CPU
             {
                 case MachineCycleEnum.M1_T1_H:
                     Bus.Address = Register.PC;
+                    Register.PC++;
                     M1 = false;
                     break;
                 case MachineCycleEnum.M1_T1_L:
@@ -123,7 +130,8 @@ namespace AILZ80CPU
                 case MachineCycleEnum.M1_T2_H:
                     break;
                 case MachineCycleEnum.M1_T2_L:
-                    var data = Bus.Data;
+                    OP1 = Bus.Data;
+                    ExecuteOperation();
                     break;
                 case MachineCycleEnum.M1_T3_H:
                     Bus.Address = (UInt16)(Register.R * 256);
@@ -147,6 +155,19 @@ namespace AILZ80CPU
             Bus.WR = WR;
             Bus.M1 = M1;
             Bus.RFSH = RFSH;
+        }
+
+        private void ExecuteOperation()
+        {
+            switch (OP1)
+            {
+                case 0x00: // NOP
+                    break;
+                case 0x01: // LD BC,n'n
+
+                default:
+                    break;
+            }
         }
 
         /*

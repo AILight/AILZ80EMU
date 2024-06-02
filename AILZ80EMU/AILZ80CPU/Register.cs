@@ -34,19 +34,19 @@ namespace AILZ80CPU
         private byte _r;
 
         // トラップハンドラ
-        public Action<RegisterType, AccessType, ushort>? OnRegisterAccess;
+        public Action<RegisterEnum, AccessType, ushort>? OnRegisterAccess;
 
         public ushort AF
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.AF, AccessType.Read, _af);
+                OnRegisterAccess?.Invoke(RegisterEnum.AF, AccessType.Read, _af);
                 return _af;
             }
             private set
             {
                 _af = value;
-                OnRegisterAccess?.Invoke(RegisterType.AF, AccessType.Write, _af);
+                OnRegisterAccess?.Invoke(RegisterEnum.AF, AccessType.Write, _af);
             }
         }
 
@@ -54,13 +54,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.BC, AccessType.Read, _bc);
+                OnRegisterAccess?.Invoke(RegisterEnum.BC, AccessType.Read, _bc);
                 return _bc;
             }
             private set
             {
                 _bc = value;
-                OnRegisterAccess?.Invoke(RegisterType.BC, AccessType.Write, _bc);
+                OnRegisterAccess?.Invoke(RegisterEnum.BC, AccessType.Write, _bc);
             }
         }
 
@@ -68,13 +68,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.DE, AccessType.Read, _de);
+                OnRegisterAccess?.Invoke(RegisterEnum.DE, AccessType.Read, _de);
                 return _de;
             }
             private set
             {
                 _de = value;
-                OnRegisterAccess?.Invoke(RegisterType.DE, AccessType.Write, _de);
+                OnRegisterAccess?.Invoke(RegisterEnum.DE, AccessType.Write, _de);
             }
         }
 
@@ -82,13 +82,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.HL, AccessType.Read, _hl);
+                OnRegisterAccess?.Invoke(RegisterEnum.HL, AccessType.Read, _hl);
                 return _hl;
             }
             private set
             {
                 _hl = value;
-                OnRegisterAccess?.Invoke(RegisterType.HL, AccessType.Write, _hl);
+                OnRegisterAccess?.Invoke(RegisterEnum.HL, AccessType.Write, _hl);
             }
         }
 
@@ -96,13 +96,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.AF_S, AccessType.Read, _af_s);
+                OnRegisterAccess?.Invoke(RegisterEnum.AF_S, AccessType.Read, _af_s);
                 return _af_s;
             }
             private set
             {
                 _af_s = value;
-                OnRegisterAccess?.Invoke(RegisterType.AF_S, AccessType.Write, _af_s);
+                OnRegisterAccess?.Invoke(RegisterEnum.AF_S, AccessType.Write, _af_s);
             }
         }
 
@@ -110,13 +110,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.BC_S, AccessType.Read, _bc_s);
+                OnRegisterAccess?.Invoke(RegisterEnum.BC_S, AccessType.Read, _bc_s);
                 return _bc_s;
             }
             private set
             {
                 _bc_s = value;
-                OnRegisterAccess?.Invoke(RegisterType.BC_S, AccessType.Write, _bc_s);
+                OnRegisterAccess?.Invoke(RegisterEnum.BC_S, AccessType.Write, _bc_s);
             }
         }
 
@@ -124,13 +124,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.DE_S, AccessType.Read, _de_s);
+                OnRegisterAccess?.Invoke(RegisterEnum.DE_S, AccessType.Read, _de_s);
                 return _de_s;
             }
             private set
             {
                 _de_s = value;
-                OnRegisterAccess?.Invoke(RegisterType.DE_S, AccessType.Write, _de_s);
+                OnRegisterAccess?.Invoke(RegisterEnum.DE_S, AccessType.Write, _de_s);
             }
         }
 
@@ -138,13 +138,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.HL_S, AccessType.Read, _hl_s);
+                OnRegisterAccess?.Invoke(RegisterEnum.HL_S, AccessType.Read, _hl_s);
                 return _hl_s;
             }
             private set
             {
                 _hl_s = value;
-                OnRegisterAccess?.Invoke(RegisterType.HL_S, AccessType.Write, _hl_s);
+                OnRegisterAccess?.Invoke(RegisterEnum.HL_S, AccessType.Write, _hl_s);
             }
         }
 
@@ -152,13 +152,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.IX, AccessType.Read, _ix);
+                OnRegisterAccess?.Invoke(RegisterEnum.IX, AccessType.Read, _ix);
                 return _ix;
             }
             private set
             {
                 _ix = value;
-                OnRegisterAccess?.Invoke(RegisterType.IX, AccessType.Write, _ix);
+                OnRegisterAccess?.Invoke(RegisterEnum.IX, AccessType.Write, _ix);
             }
         }
 
@@ -166,13 +166,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.IY, AccessType.Read, _iy);
+                OnRegisterAccess?.Invoke(RegisterEnum.IY, AccessType.Read, _iy);
                 return _iy;
             }
             private set
             {
                 _iy = value;
-                OnRegisterAccess?.Invoke(RegisterType.IY, AccessType.Write, _iy);
+                OnRegisterAccess?.Invoke(RegisterEnum.IY, AccessType.Write, _iy);
             }
         }
 
@@ -180,13 +180,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.SP, AccessType.Read, _sp);
+                OnRegisterAccess?.Invoke(RegisterEnum.SP, AccessType.Read, _sp);
                 return _sp;
             }
             set
             {
                 _sp = value;
-                OnRegisterAccess?.Invoke(RegisterType.SP, AccessType.Write, _sp);
+                OnRegisterAccess?.Invoke(RegisterEnum.SP, AccessType.Write, _sp);
             }
         }
 
@@ -194,13 +194,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.PC, AccessType.Read, _pc);
+                OnRegisterAccess?.Invoke(RegisterEnum.PC, AccessType.Read, _pc);
                 return _pc;
             }
             set
             {
                 _pc = value;
-                OnRegisterAccess?.Invoke(RegisterType.PC, AccessType.Write, _pc);
+                OnRegisterAccess?.Invoke(RegisterEnum.PC, AccessType.Write, _pc);
             }
         }
 
@@ -208,13 +208,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.I, AccessType.Read, _i);
+                OnRegisterAccess?.Invoke(RegisterEnum.I, AccessType.Read, _i);
                 return _i;
             }
             set
             {
                 _i = value;
-                OnRegisterAccess?.Invoke(RegisterType.I, AccessType.Write, _i);
+                OnRegisterAccess?.Invoke(RegisterEnum.I, AccessType.Write, _i);
             }
         }
 
@@ -222,13 +222,13 @@ namespace AILZ80CPU
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterType.R, AccessType.Read, _r);
+                OnRegisterAccess?.Invoke(RegisterEnum.R, AccessType.Read, _r);
                 return _r;
             }
             set
             {
                 _r = value;
-                OnRegisterAccess?.Invoke(RegisterType.R, AccessType.Write, _r);
+                OnRegisterAccess?.Invoke(RegisterEnum.R, AccessType.Write, _r);
             }
         }
 
