@@ -82,7 +82,7 @@ namespace AILZ80CPU
                     CPU.RFSH = false;
                 },
 
-            }
+            };
 
         /*
          *             switch (TimingCycle)
