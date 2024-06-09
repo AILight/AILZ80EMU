@@ -14,48 +14,50 @@ namespace AILZ80CPU
         public Register Register { get; private set; }
         public IO IO { get; private set; }
 
-        public MachineCycleEnum MachineCycle { get; private set; }
+        public TimingCycleEnum TimingCycle { get; private set; }
         public bool ClockState { get; private set; }
         /// <summary>
         /// メモリリクエスト
         /// </summary>
-        public bool MREQ { get; private set; }
+        public bool MREQ { get; internal set; }
         /// <summary>
         /// IOリクエスト
         /// </summary>
-        public bool IORQ { get; private set; }　
+        public bool IORQ { get; internal set; }　
         /// <summary>
         /// リード
         /// </summary>
-        public bool RD { get; private set; }
+        public bool RD { get; internal set; }
         /// <summary>
         /// ライト
         /// </summary>
-        public bool WR { get; private set; }
+        public bool WR { get; internal set; }
         /// <summary>
         /// マスカブル割り込み
         /// </summary>
-        public bool INT { get; private set; }
+        public bool INT { get; internal set; }
         /// <summary>
         /// ノンマスカブル割り込み
         /// </summary>
-        public bool NMI { get; private set; }
+        public bool NMI { get; internal set; }
         /// <summary>
         /// HALT
         /// </summary>
-        public bool HALT { get; private set; }
-        public bool RFSH { get; private set; }
-        public bool M1 { get; private set; }
-        public bool RESET { get; private set; }
-        public bool BUSRQ { get; private set; }
-        public bool WAIT { get; private set; }
-        public bool BUSACK { get; private set; }
+        public bool HALT { get; internal set; }
+        public bool RFSH { get; internal set; }
+        public bool M1 { get; internal set; }
+        public bool RESET { get; internal set; }
+        public bool BUSRQ { get; internal set; }
+        public bool WAIT { get; internal set; }
+        public bool BUSACK { get; internal set; }
 
         public ushort Address { get; set; }
         public byte Data { get; set; }
 
-        private Bus Bus { get; set; }
-        
+        public Bus Bus { get; internal set; }
+
+        public OperationPack RootOperationPack { get; private set; }
+
         /*
         private byte OP1 { get; set; }
         private byte OP2 { get; set; }
@@ -83,24 +85,32 @@ namespace AILZ80CPU
             var a = new OperationPack()
             {
                 OPs = new byte[] { 0x00 },
-                EndMachineCycle = MachineCycleEnum.M1_T4_L
+                EndTimingCycle = TimingCycleEnum.M1_T4_L
             };
             var b = new OperationPack()
             {
                 OPs = new byte[] { 0x01 },
-                Actions = new Dictionary<MachineCycleEnum, Action>()
+                Actions = new Dictionary<TimingCycleEnum, Action>()
                 {
-                    [MachineCycleEnum.]
+                    [TimingCycleEnum.]
                 }
-                EndMachineCycle = MachineCycleEnum.M1_T4_L
+                EndTimingCycle = TimingCycleEnum.M1_T4_L
             };
+            RootOperationPack = new OperationPack()
+            {
+                TimingCycles = 
+                OperationPackDictionary = new Dictionary<byte, OperationPack>()
+                {
+                    { 0x00, a },
+                }
+            }
 
 
         }
 
         public void Reset()
         {
-            MachineCycle = MachineCycleEnum.None;
+            TimingCycle = TimingCycleEnum.None;
             MREQ = true;
             RD = true;
             WR = true;
@@ -119,40 +129,40 @@ namespace AILZ80CPU
             base.ExecuteClock(clockState);
 
             // ステートを変更する
-            if (MachineCycle == MachineCycleEnum.None && clockState)
+            if (TimingCycle == TimingCycleEnum.None && clockState)
             {
-                MachineCycle = MachineCycleEnum.M1_T1_H;
+                TimingCycle = TimingCycleEnum.M1_T1_H;
             }
             else
             {
                 // ステートを変更する
-                if ((((int)MachineCycle & 1) == 1 && clockState) ||
-                    (((int)MachineCycle & 1) == 0 && !clockState))
+                if ((((int)TimingCycle & 1) == 1 && clockState) ||
+                    (((int)TimingCycle & 1) == 0 && !clockState))
                 {
                     return;
                 }
-                MachineCycle = MachineCycle + 1;
+                TimingCycle = TimingCycle + 1;
             }
  
             // 実際の処理を動作させる
-            switch (MachineCycle)
+            switch (TimingCycle)
             {
-                case MachineCycleEnum.M1_T1_H:
+                case TimingCycleEnum.M1_T1_H:
                     Bus.Address = Register.PC;
                     Register.PC++;
                     M1 = false;
                     break;
-                case MachineCycleEnum.M1_T1_L:
+                case TimingCycleEnum.M1_T1_L:
                     MREQ = false;
                     RD = false;
                     break;
-                case MachineCycleEnum.M1_T2_H:
+                case TimingCycleEnum.M1_T2_H:
                     break;
-                case MachineCycleEnum.M1_T2_L:
+                case TimingCycleEnum.M1_T2_L:
                     OP1 = Bus.Data;
                     ExecuteOperation();
                     break;
-                case MachineCycleEnum.M1_T3_H:
+                case TimingCycleEnum.M1_T3_H:
                     Bus.Address = (UInt16)(Register.R * 256);
                     Register.R = (byte)((Register.R + 1) & 0x7F);
                     MREQ = true;
@@ -160,12 +170,12 @@ namespace AILZ80CPU
                     M1 = true;
                     RFSH = false;
                     break;
-                case MachineCycleEnum.M1_T3_L:
+                case TimingCycleEnum.M1_T3_L:
                     MREQ = false;
                     break;
-                case MachineCycleEnum.M1_T4_H:
+                case TimingCycleEnum.M1_T4_H:
                     break;
-                case MachineCycleEnum.M1_T4_L:
+                case TimingCycleEnum.M1_T4_L:
                     MREQ = true;
                     break;
             }
@@ -175,6 +185,9 @@ namespace AILZ80CPU
             Bus.M1 = M1;
             Bus.RFSH = RFSH;
         }
+
+        // CB, DD, ED, FD
+
 
         private void ExecuteOperation()
         {
