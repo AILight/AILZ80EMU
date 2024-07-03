@@ -7,22 +7,22 @@ using System.Threading.Tasks;
 
 namespace AILZ80CPU
 {
-    public class OperationPack
+    public class OperationPack_Sample
     {
         private CPUZ80 CPU { get; set; }
         public TimingCycleEnum[]? TimingCycles { get; set; }
         public Dictionary<TimingCycleEnum, Action>? TimingCycleActions { get; set; }
         //public Dictionary<TimingCycleEnum, TimingCycleEnum>? NextTimingCycleDic { get; set; }
         //public TimingCycleEnum EndTimingCycle { get; set; }
-        public Dictionary<byte, OperationPack>? OperationPackDictionary { get; set; }
+        //public Dictionary<byte, OperationPack>? OperationPackDictionary { get; set; }
 
         //public static TimingCycleEnum[] OpCodeFetchTimingCycles = {  }
-        public OperationPack(CPUZ80 cpu)
+        public OperationPack_Sample(CPUZ80 cpu)
         {
             CPU = cpu;
         }
 
-        public OperationPack(CPUZ80 cpu, MachineCycleEnum machineCycle)
+        public OperationPack_Sample(CPUZ80 cpu, MachineCycleEnum machineCycle)
             : this(cpu)
         {
             if (machineCycle.HasFlag(MachineCycleEnum.OpcodeFetch))
@@ -39,9 +39,9 @@ namespace AILZ80CPU
             }
         }
 
-        private void OperationPackForOpecodeFetch() 
+        private void OperationPackForOpecodeFetch()
         {
-            TimingCycles = new TimingCycleEnum[] { 
+            TimingCycles = new TimingCycleEnum[] {
                                 TimingCycleEnum.M1_T1_H,
                                 TimingCycleEnum.M1_T1_L,
                                 TimingCycleEnum.M1_T2_H,
@@ -84,42 +84,42 @@ namespace AILZ80CPU
 
             };
 
-        /*
-         *             switch (TimingCycle)
-            {
-                case TimingCycleEnum.M1_T1_H:
-                    Bus.Address = Register.PC;
-                    Register.PC++;
-                    M1 = false;
-                    break;
-                case TimingCycleEnum.M1_T1_L:
-                    MREQ = false;
-                    RD = false;
-                    break;
-                case TimingCycleEnum.M1_T2_H:
-                    break;
-                case TimingCycleEnum.M1_T2_L:
-                    OP1 = Bus.Data;
-                    ExecuteOperation();
-                    break;
-                case TimingCycleEnum.M1_T3_H:
-                    Bus.Address = (UInt16)(Register.R * 256);
-                    Register.R = (byte)((Register.R + 1) & 0x7F);
-                    MREQ = true;
-                    RD = true;
-                    M1 = true;
-                    RFSH = false;
-                    break;
-                case TimingCycleEnum.M1_T3_L:
-                    MREQ = false;
-                    break;
-                case TimingCycleEnum.M1_T4_H:
-                    break;
-                case TimingCycleEnum.M1_T4_L:
-                    MREQ = true;
-                    break;
-            }
-         */
+            /*
+             *             switch (TimingCycle)
+                {
+                    case TimingCycleEnum.M1_T1_H:
+                        Bus.Address = Register.PC;
+                        Register.PC++;
+                        M1 = false;
+                        break;
+                    case TimingCycleEnum.M1_T1_L:
+                        MREQ = false;
+                        RD = false;
+                        break;
+                    case TimingCycleEnum.M1_T2_H:
+                        break;
+                    case TimingCycleEnum.M1_T2_L:
+                        OP1 = Bus.Data;
+                        ExecuteOperation();
+                        break;
+                    case TimingCycleEnum.M1_T3_H:
+                        Bus.Address = (UInt16)(Register.R * 256);
+                        Register.R = (byte)((Register.R + 1) & 0x7F);
+                        MREQ = true;
+                        RD = true;
+                        M1 = true;
+                        RFSH = false;
+                        break;
+                    case TimingCycleEnum.M1_T3_L:
+                        MREQ = false;
+                        break;
+                    case TimingCycleEnum.M1_T4_H:
+                        break;
+                    case TimingCycleEnum.M1_T4_L:
+                        MREQ = true;
+                        break;
+                }
+             */
 
+        }
     }
-}

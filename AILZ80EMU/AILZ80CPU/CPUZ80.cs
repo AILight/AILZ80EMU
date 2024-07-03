@@ -1,4 +1,5 @@
-﻿using AILZ80LIB;
+﻿using AILZ80CPU.OperationPacks;
+using AILZ80LIB;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
