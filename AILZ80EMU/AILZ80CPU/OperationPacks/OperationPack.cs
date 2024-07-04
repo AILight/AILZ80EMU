@@ -10,7 +10,7 @@ namespace AILZ80CPU.OperationPacks
     public abstract class OperationPack
     {
         public TimingCycleEnum[]? TimingCycles { get; set; }
-        public Dictionary<TimingCycleEnum, Action>? TimingCycleActions { get; set; }
+        public Dictionary<TimingCycleEnum, Action<CPUZ80>>? TimingCycleActions { get; set; }
 
         public OperationPack()
         {
