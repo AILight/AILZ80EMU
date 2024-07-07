@@ -15,7 +15,7 @@ namespace AILZ80CPU
         public Register Register { get; private set; }
         public IO IO { get; private set; }
 
-        public TimingCycleEnum TimingCycle { get; private set; }
+        public TimingCycleEnum TimingCycle { get; internal set; }
         public bool ClockState { get; private set; }
         /// <summary>
         /// メモリリクエスト
@@ -57,20 +57,8 @@ namespace AILZ80CPU
 
         public Bus Bus { get; internal set; }
 
-        public OperationPack RootOperationPack { get; private set; }
-
-        /*
-        private byte OP1 { get; set; }
-        private byte OP2 { get; set; }
-        private byte RD1 { get; set; }
-        private byte RD2 { get; set; }
-        private byte WD1 { get; set; }
-        private byte WD2 { get; set; }
-        */
-
-        //public InstructionSet InstructionSet { get; private set; }
-        //public Clock Clock { get; private set; }
-        //public InterruptController InterruptController { get; private set; }
+        public OperationPack? ExecutingOperationPack { get; set; } = default;
+        public Queue<OperationPack> OperationPacks { get; private set; } = new Queue<OperationPack>();
         private int StepCounter { get; set; } = 0;
 
         public CPUZ80(Bus bus)
@@ -80,33 +68,6 @@ namespace AILZ80CPU
             Bus = bus;
 
             Reset();
-            //InstructionSet = new InstructionSet();
-            //Clock = new Clock();
-            //InterruptController = new InterruptController();
-            var a = new OperationPack()
-            {
-                OPs = new byte[] { 0x00 },
-                EndTimingCycle = TimingCycleEnum.M1_T4_L
-            };
-            var b = new OperationPack()
-            {
-                OPs = new byte[] { 0x01 },
-                Actions = new Dictionary<TimingCycleEnum, Action>()
-                {
-                    [TimingCycleEnum.]
-                }
-                EndTimingCycle = TimingCycleEnum.M1_T4_L
-            };
-            RootOperationPack = new OperationPack()
-            {
-                TimingCycles = 
-                OperationPackDictionary = new Dictionary<byte, OperationPack>()
-                {
-                    { 0x00, a },
-                }
-            }
-
-
         }
 
         public void Reset()
@@ -128,6 +89,21 @@ namespace AILZ80CPU
         public override void ExecuteClock(bool clockState)
         {
             base.ExecuteClock(clockState);
+
+            if (ExecutingOperationPack == default)
+            {
+                if (OperationPacks.Count == 0)
+                {
+                    ExecutingOperationPack = new OperationPackOpcodeFetch();
+                }
+                else
+                {
+                    ExecutingOperationPack = OperationPacks.Dequeue();
+                }
+            }
+
+            ExecutingOperationPack.Execute();
+
 
             // ステートを変更する
             if (TimingCycle == TimingCycleEnum.None && clockState)

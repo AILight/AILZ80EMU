@@ -43,7 +43,7 @@ namespace AILZ80CPU
                 OnRegisterAccess?.Invoke(RegisterEnum.AF, AccessType.Read, _af);
                 return _af;
             }
-            private set
+            set
             {
                 _af = value;
                 OnRegisterAccess?.Invoke(RegisterEnum.AF, AccessType.Write, _af);
@@ -57,7 +57,7 @@ namespace AILZ80CPU
                 OnRegisterAccess?.Invoke(RegisterEnum.BC, AccessType.Read, _bc);
                 return _bc;
             }
-            private set
+            set
             {
                 _bc = value;
                 OnRegisterAccess?.Invoke(RegisterEnum.BC, AccessType.Write, _bc);
@@ -71,7 +71,7 @@ namespace AILZ80CPU
                 OnRegisterAccess?.Invoke(RegisterEnum.DE, AccessType.Read, _de);
                 return _de;
             }
-            private set
+            set
             {
                 _de = value;
                 OnRegisterAccess?.Invoke(RegisterEnum.DE, AccessType.Write, _de);
@@ -85,7 +85,7 @@ namespace AILZ80CPU
                 OnRegisterAccess?.Invoke(RegisterEnum.HL, AccessType.Read, _hl);
                 return _hl;
             }
-            private set
+            set
             {
                 _hl = value;
                 OnRegisterAccess?.Invoke(RegisterEnum.HL, AccessType.Write, _hl);
@@ -278,6 +278,18 @@ namespace AILZ80CPU
         {
             get => (byte)(HL & 0x00FF);
             set => HL = (ushort)((HL & 0xFF00) | value);
+        }
+
+        public byte SP_H
+        {
+            get => (byte)(SP >> 8);
+            set => SP = (ushort)((value << 8) | (SP & 0x00FF));
+        }
+
+        public byte SP_L
+        {
+            get => (byte)(SP & 0x00FF);
+            set => SP = (ushort)((SP & 0xFF00) | value);
         }
 
         public byte IXH
