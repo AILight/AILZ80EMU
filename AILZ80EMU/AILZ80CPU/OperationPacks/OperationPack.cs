@@ -107,5 +107,94 @@ namespace AILZ80CPU.OperationPacks
 
             // キャリーフラグは変化しないので設定しない
         }
+
+        protected void ExecuteDEC8(RegisterEnum register)
+        {
+            var value = register switch
+            {
+                RegisterEnum.A => CPU.Register.A,
+                RegisterEnum.B => CPU.Register.B,
+                RegisterEnum.C => CPU.Register.C,
+                RegisterEnum.D => CPU.Register.D,
+                RegisterEnum.E => CPU.Register.E,
+                RegisterEnum.H => CPU.Register.H,
+                RegisterEnum.L => CPU.Register.L,
+                _ => throw new NotImplementedException()
+            };
+
+            var originalValue = value;
+            value--;
+
+            // 更新された値をレジスタに戻す
+            switch (register)
+            {
+                case RegisterEnum.A:
+                    CPU.Register.A = value;
+                    break;
+                case RegisterEnum.B:
+                    CPU.Register.B = value;
+                    break;
+                case RegisterEnum.C:
+                    CPU.Register.C = value;
+                    break;
+                case RegisterEnum.D:
+                    CPU.Register.D = value;
+                    break;
+                case RegisterEnum.E:
+                    CPU.Register.E = value;
+                    break;
+                case RegisterEnum.H:
+                    CPU.Register.H = value;
+                    break;
+                case RegisterEnum.L:
+                    CPU.Register.L = value;
+                    break;
+            }
+
+            // サインフラグの設定
+            if ((value & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Sign;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Sign;
+            }
+
+            // ゼロフラグの設定
+            if (value == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Zero;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Zero;
+            }
+
+            // ハーフキャリーフラグの設定
+            if ((originalValue & 0x0F) == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+            }
+
+            // オーバーフローフラグの設定
+            if (originalValue == 0x80)
+            {
+                CPU.Register.F |= (byte)FlagEnum.ParityOverflow;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.ParityOverflow;
+            }
+
+            // サブトラクトフラグの設定（DEC命令なのでセット）
+            CPU.Register.F |= (byte)FlagEnum.AddSubtract;
+
+            // キャリーフラグは変化しないので設定しない
+        }
     }
 }

@@ -12,12 +12,10 @@ namespace AILZ80CPU.OperationPacks
     {
         public byte OPCode { get; set; }
 
-        public OperationPackReadMemory16(CPUZ80 cpu, byte opCode)
+        public OperationPackReadMemory16(CPUZ80 cpu)
         : base(cpu)
 
         {
-            OPCode = opCode;
-
             TimingCycles = new TimingCycleEnum[] {
                                 TimingCycleEnum.R1_T1_H,
                                 TimingCycleEnum.R1_T1_L,
@@ -135,6 +133,12 @@ namespace AILZ80CPU.OperationPacks
                     return default;
                 },
             };
+        }
+
+        public void SetOPCode(byte opCode)
+        {
+            OPCode = opCode;
+            ExecuteIndex = 0;
         }
     }
 }

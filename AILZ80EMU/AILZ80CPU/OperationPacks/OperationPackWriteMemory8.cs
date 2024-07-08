@@ -11,7 +11,7 @@ namespace AILZ80CPU.OperationPacks
     {
         public byte OPCode { get; set; }
 
-        public OperationPackWriteMemory8(CPUZ80 cpu, byte opCode)
+        public OperationPackWriteMemory8(CPUZ80 cpu)
             : base(cpu)
         {
             TimingCycles = new TimingCycleEnum[] {
@@ -32,6 +32,18 @@ namespace AILZ80CPU.OperationPacks
                         case 0x02: // LD (BC),A
                             CPU.Bus.Address = CPU.Register.BC;
                             break;
+                        case 0x12: // LD (DE),A
+                            CPU.Bus.Address = CPU.Register.DE;
+                            break;
+                        case 0x70: // LD (HL),B
+                        case 0x71: // LD (HL),C
+                        case 0x72: // LD (HL),D
+                        case 0x73: // LD (HL),E
+                        case 0x74: // LD (HL),H
+                        case 0x75: // LD (HL),L
+                        case 0x77: // LD (HL),A
+                            CPU.Bus.Address = CPU.Register.HL;
+                            break;
                         default:
                             break;
                     }
@@ -43,7 +55,27 @@ namespace AILZ80CPU.OperationPacks
                     switch (OPCode)
                     {
                         case 0x02: // LD (BC),A
+                        case 0x12: // LD (DE),A
+                        case 0x77: // LD (HL),A
                             CPU.Bus.Data = CPU.Register.A;
+                            break;
+                        case 0x70: // LD (HL),B
+                            CPU.Bus.Data = CPU.Register.B;
+                            break;
+                        case 0x71: // LD (HL),C
+                            CPU.Bus.Data = CPU.Register.C;
+                            break;
+                        case 0x72: // LD (HL),D
+                            CPU.Bus.Data = CPU.Register.D;
+                            break;
+                        case 0x73: // LD (HL),E
+                            CPU.Bus.Data = CPU.Register.E;
+                            break;
+                        case 0x74: // LD (HL),H
+                            CPU.Bus.Data = CPU.Register.H;
+                            break;
+                        case 0x75: // LD (HL),L
+                            CPU.Bus.Data = CPU.Register.L;
                             break;
                         default:
                             break;
@@ -75,6 +107,12 @@ namespace AILZ80CPU.OperationPacks
                     return default;
                 },
             };
+        }
+
+        public void SetOPCode(byte opCode)
+        {
+            OPCode = opCode;
+            ExecuteIndex = 0;
         }
     }
 }
