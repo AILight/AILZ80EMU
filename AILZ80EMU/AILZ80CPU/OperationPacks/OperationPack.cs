@@ -196,5 +196,298 @@ namespace AILZ80CPU.OperationPacks
 
             // キャリーフラグは変化しないので設定しない
         }
+
+        protected void ExecuteRLCA()
+        {
+            // アキュムレータの値を取得
+            var value = CPU.Register.A;
+
+            // ビット7を取得
+            var bit7 = (value & 0x80) != 0;
+
+            // 1ビット左に回転
+            value = (byte)((value << 1) | (bit7 ? 1 : 0));
+
+            // アキュレータに結果を保存
+            CPU.Register.A = value;
+
+            // キャリーフラグの設定
+            if (bit7)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // 他のフラグは影響を受けない
+            // サブトラクトフラグ、ゼロフラグ、ハーフキャリーフラグ、パリティ/オーバーフローフラグは影響しないので、変更しない
+        }
+
+        protected void ExecuteRLA()
+        {
+            // アキュムレータの値を取得
+            var value = CPU.Register.A;
+
+            // 現在のキャリーフラグの値を取得
+            var carryFlag = (CPU.Register.F & (byte)FlagEnum.Carry) != 0;
+
+            // ビット7を取得
+            var bit7 = (value & 0x80) != 0;
+
+            // 1ビット左に回転し、ビット0に元のキャリーフラグの値を設定
+            value = (byte)((value << 1) | (carryFlag ? 1 : 0));
+
+            // アキュレータに結果を保存
+            CPU.Register.A = value;
+
+            // ビット7の値に基づいてキャリーフラグを設定
+            if (bit7)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // 他のフラグは影響を受けない
+            // サブトラクトフラグ、ゼロフラグ、ハーフキャリーフラグ、パリティ/オーバーフローフラグは影響しないので、変更しない
+        }
+
+        protected void ExecuteDAA()
+        {
+            byte correction = 0;
+            bool carryFlag = (CPU.Register.F & (byte)FlagEnum.Carry) != 0;
+            bool halfCarryFlag = (CPU.Register.F & (byte)FlagEnum.HalfCarry) != 0;
+            bool subtractFlag = (CPU.Register.F & (byte)FlagEnum.AddSubtract) != 0;
+
+            // アキュムレータの値を取得
+            var value = CPU.Register.A;
+
+            if (halfCarryFlag || (!subtractFlag && (value & 0x0F) > 9))
+            {
+                correction |= 0x06;
+            }
+
+            if (carryFlag || (!subtractFlag && value > 0x99))
+            {
+                correction |= 0x60;
+                carryFlag = true;
+            }
+            else
+            {
+                carryFlag = false;
+            }
+
+            if (subtractFlag)
+            {
+                value -= correction;
+            }
+            else
+            {
+                value += correction;
+            }
+
+            // アキュレータに結果を保存
+            CPU.Register.A = (byte)value;
+
+            // ゼロフラグの設定
+            if (value == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Zero;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Zero;
+            }
+
+            // キャリーフラグの設定
+            if (carryFlag)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // ハーフキャリーフラグの設定
+            CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+
+            // パリティ/オーバーフローフラグは変更しない
+        }
+
+        protected void ExecuteSCF()
+        {
+            // キャリーフラグをセット
+            CPU.Register.F |= (byte)FlagEnum.Carry;
+
+            // ハーフキャリーフラグをリセット
+            CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+
+            // サブトラクトフラグをリセット
+            CPU.Register.F &= (byte)~FlagEnum.AddSubtract;
+
+            // 他のフラグは影響を受けない
+            // ゼロフラグ、サインフラグ、パリティ/オーバーフローフラグは変更しない
+        }
+
+        protected void ExecuteRRCA()
+        {
+            // アキュムレータの値を取得
+            var value = CPU.Register.A;
+
+            // ビット0を取得
+            var bit0 = (value & 0x01) != 0;
+
+            // 1ビット右に回転
+            value = (byte)((value >> 1) | (bit0 ? 0x80 : 0));
+
+            // アキュレータに結果を保存
+            CPU.Register.A = value;
+
+            // キャリーフラグの設定
+            if (bit0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // 他のフラグは影響を受けない
+            // サブトラクトフラグ、ゼロフラグ、ハーフキャリーフラグ、パリティ/オーバーフローフラグは影響しないので、変更しない
+        }
+
+        protected void ExecuteRRA()
+        {
+            // アキュムレータの値を取得
+            var value = CPU.Register.A;
+
+            // 現在のキャリーフラグの値を取得
+            var carryFlag = (CPU.Register.F & (byte)FlagEnum.Carry) != 0;
+
+            // ビット0を取得
+            var bit0 = (value & 0x01) != 0;
+
+            // 1ビット右に回転し、ビット7に元のキャリーフラグの値を設定
+            value = (byte)((value >> 1) | (carryFlag ? 0x80 : 0));
+
+            // アキュレータに結果を保存
+            CPU.Register.A = value;
+
+            // ビット0の値に基づいてキャリーフラグを設定
+            if (bit0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // 他のフラグは影響を受けない
+            // サブトラクトフラグ、ゼロフラグ、ハーフキャリーフラグ、パリティ/オーバーフローフラグは変更しない
+        }
+
+        protected void ExecuteCPL()
+        {
+            // アキュムレータの値をビットごとに反転
+            CPU.Register.A = (byte)~CPU.Register.A;
+
+            // サブトラクトフラグをセット
+            CPU.Register.F |= (byte)FlagEnum.AddSubtract;
+
+            // ハーフキャリーフラグをセット
+            CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+
+            // 他のフラグは影響を受けない
+            // キャリーフラグ、ゼロフラグ、サインフラグ、パリティ/オーバーフローフラグは変更しない
+        }
+
+        protected void ExecuteCCF()
+        {
+            // キャリーフラグを反転
+            if ((CPU.Register.F & (byte)FlagEnum.Carry) != 0)
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+
+            // ハーフキャリーフラグを設定
+            // CCF命令はハーフキャリーフラグをアキュムレータのビット3にする
+            if ((CPU.Register.A & 0x08) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+            }
+
+            // サブトラクトフラグをクリア
+            CPU.Register.F &= (byte)~FlagEnum.AddSubtract;
+
+            // 他のフラグは影響を受けない
+            // ゼロフラグ、サインフラグ、パリティ/オーバーフローフラグは変更しない
+        }
+
+        protected void ExecuteEXAFAF_S()
+        {
+            // 主レジスタセットと代替レジスタセットの内容を交換
+            var temp = CPU.Register.AF;
+
+            CPU.Register.AF = CPU.Register.AF_S;
+
+            CPU.Register.AF_S = temp;
+        }
+
+        protected void ExecuteADDHL(RegisterEnum register)
+        {
+            var hl = CPU.Register.HL;
+            var valueToAdd = register switch
+            {
+                RegisterEnum.BC => CPU.Register.BC,
+                RegisterEnum.DE => CPU.Register.DE,
+                RegisterEnum.HL => CPU.Register.HL,
+                RegisterEnum.SP => CPU.Register.SP,
+                _ => throw new NotImplementedException()
+            };
+
+            // 16ビット加算
+            var result = (uint)(hl + valueToAdd);
+
+            // ハーフキャリーフラグの設定
+            if (((hl & 0x0FFF) + (valueToAdd & 0x0FFF)) > 0x0FFF)
+            {
+                CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+            }
+
+            // キャリーフラグの設定
+            if (result > 0xFFFF)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // 結果をHLレジスタに設定
+            CPU.Register.HL = (ushort)result;
+
+            // サブトラクトフラグをクリア
+            CPU.Register.F &= (byte)~FlagEnum.AddSubtract;
+        }
     }
 }

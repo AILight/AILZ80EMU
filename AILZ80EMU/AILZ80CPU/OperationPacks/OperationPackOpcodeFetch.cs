@@ -66,6 +66,33 @@ namespace AILZ80CPU.OperationPacks
                             OperationPackReadMemory16.SetOPCode(opCode);
                             result = OperationPackReadMemory16;
                             break;
+                        case 0x07:  // RLCA
+                            ExecuteRLCA();
+                            break;
+                        case 0x17:  // RLA
+                            ExecuteRLA();
+                            break;
+                        case 0x27:  // DAA
+                            ExecuteDAA();
+                            break;
+                        case 0x37:  // SCF
+                            ExecuteSCF();
+                            break;
+                        case 0x0F:  // RRCA
+                            ExecuteRRCA();
+                            break;
+                        case 0x1F:  // RRA
+                            ExecuteRRA();
+                            break;
+                        case 0x2F:  // CPL
+                            ExecuteCPL();
+                            break;
+                        case 0x3F:  // CCF
+                            ExecuteCCF();
+                            break;
+                        case 0x08:  // EX AF,AF'
+                            ExecuteEXAFAF_S();
+                            break;
                         case 0x02:  // LD (BC),A
                         case 0x12:  // LD (DE),A
                         case 0x70:  // LD (HL),B

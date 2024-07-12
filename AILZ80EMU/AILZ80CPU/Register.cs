@@ -99,7 +99,7 @@ namespace AILZ80CPU
                 OnRegisterAccess?.Invoke(RegisterEnum.AF_S, AccessType.Read, _af_s);
                 return _af_s;
             }
-            private set
+            set
             {
                 _af_s = value;
                 OnRegisterAccess?.Invoke(RegisterEnum.AF_S, AccessType.Write, _af_s);
