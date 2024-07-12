@@ -1,4 +1,5 @@
 ﻿using AILZ80LIB;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,25 @@ namespace AILZ80CPU.OperationPacks
             CPU.TimingCycle = TimingCycles![ExecuteIndex];
 
             return TimingCycleActions![CPU.TimingCycle].Invoke();
+        }
+
+        protected static RegisterEnum Select_r(byte opCode, int position)
+        {
+            var value = (opCode >> (8 - position - 3)) & 0x03;
+            var register = value switch
+            {
+                0x00 => RegisterEnum.B,
+                0x01 => RegisterEnum.C,
+                0x02 => RegisterEnum.D,
+                0x03 => RegisterEnum.E,
+                0x04 => RegisterEnum.H,
+                0x05 => RegisterEnum.L,
+                //0x06 => RegisterEnum.HL,
+                0x07 => RegisterEnum.A,
+                _ => throw new NotImplementedException()
+            };
+
+            return register;
         }
 
         protected void ExecuteINC8(RegisterEnum register)
