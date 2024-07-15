@@ -46,6 +46,18 @@ namespace AILZ80CPU.OperationPacks
                         case 0x33:   // INC SP
                             CPU.Register.SP++;
                             break;
+                        case 0x0B:   // DEC BC
+                            CPU.Register.BC--;
+                            break;
+                        case 0x1B:   // DEC DE
+                            CPU.Register.DE--;
+                            break;
+                        case 0x2B:   // DEC HL
+                            CPU.Register.HL--;
+                            break;
+                        case 0x3B:   // DEC SP
+                            CPU.Register.SP--;
+                            break;
                         default:
                             break;
                     }

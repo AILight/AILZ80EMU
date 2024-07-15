@@ -94,7 +94,7 @@ namespace AILZ80CPU
             {
                 if (OperationPacks.Count == 0)
                 {
-                    ExecutingOperationPack = new OperationPackOpcodeFetch();
+                    ExecutingOperationPack = new OperationPackOpcodeFetch(this);
                 }
                 else
                 {
@@ -103,96 +103,7 @@ namespace AILZ80CPU
             }
 
             ExecutingOperationPack.Execute();
-
-
-            // ステートを変更する
-            if (TimingCycle == TimingCycleEnum.None && clockState)
-            {
-                TimingCycle = TimingCycleEnum.M1_T1_H;
-            }
-            else
-            {
-                // ステートを変更する
-                if ((((int)TimingCycle & 1) == 1 && clockState) ||
-                    (((int)TimingCycle & 1) == 0 && !clockState))
-                {
-                    return;
-                }
-                TimingCycle = TimingCycle + 1;
-            }
- 
-            // 実際の処理を動作させる
-            switch (TimingCycle)
-            {
-                case TimingCycleEnum.M1_T1_H:
-                    Bus.Address = Register.PC;
-                    Register.PC++;
-                    M1 = false;
-                    break;
-                case TimingCycleEnum.M1_T1_L:
-                    MREQ = false;
-                    RD = false;
-                    break;
-                case TimingCycleEnum.M1_T2_H:
-                    break;
-                case TimingCycleEnum.M1_T2_L:
-                    OP1 = Bus.Data;
-                    ExecuteOperation();
-                    break;
-                case TimingCycleEnum.M1_T3_H:
-                    Bus.Address = (UInt16)(Register.R * 256);
-                    Register.R = (byte)((Register.R + 1) & 0x7F);
-                    MREQ = true;
-                    RD = true;
-                    M1 = true;
-                    RFSH = false;
-                    break;
-                case TimingCycleEnum.M1_T3_L:
-                    MREQ = false;
-                    break;
-                case TimingCycleEnum.M1_T4_H:
-                    break;
-                case TimingCycleEnum.M1_T4_L:
-                    MREQ = true;
-                    break;
-            }
-            Bus.MREQ = MREQ;
-            Bus.RD = RD;
-            Bus.WR = WR;
-            Bus.M1 = M1;
-            Bus.RFSH = RFSH;
         }
 
-        // CB, DD, ED, FD
-
-
-        private void ExecuteOperation()
-        {
-            switch (OP1)
-            {
-                case 0x00: // NOP
-                    break;
-                case 0x01: // LD BC,n'n
-
-                default:
-                    break;
-            }
-        }
-
-        /*
-        public void ExecuteNextInstruction()
-        {
-            var opcode = FetchOpcode();
-            InstructionSet.Execute(opcode, this);
-        }
-
-        private byte FetchOpcode()
-        {
-            var pc = Registers.PC;
-            var opcode = Memory.ReadByte(pc);
-            Registers.PC++;
-            return opcode;
-        }
-        */
     }
 }

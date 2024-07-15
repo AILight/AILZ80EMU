@@ -33,6 +33,11 @@ namespace AILZ80CPU
         private byte _i;
         private byte _r;
 
+        // nn レジスタ
+        private ushort _direct_address;
+        // (HL) 読み取り値
+        private byte _indirect_HL;
+
         // トラップハンドラ
         public Action<RegisterEnum, AccessType, ushort>? OnRegisterAccess;
 
@@ -204,6 +209,20 @@ namespace AILZ80CPU
             }
         }
 
+        public ushort DirectAdress
+        {
+            get
+            {
+                OnRegisterAccess?.Invoke(RegisterEnum.DirectAddress, AccessType.Read, _pc);
+                return _direct_address;
+            }
+            set
+            {
+                _direct_address = value;
+                OnRegisterAccess?.Invoke(RegisterEnum.DirectAddress, AccessType.Write, _pc);
+            }
+        }
+
         public byte I
         {
             get
@@ -229,6 +248,20 @@ namespace AILZ80CPU
             {
                 _r = value;
                 OnRegisterAccess?.Invoke(RegisterEnum.R, AccessType.Write, _r);
+            }
+        }
+
+        public byte Indirect_HL
+        {
+            get
+            {
+                OnRegisterAccess?.Invoke(RegisterEnum.IndirectHL, AccessType.Read, _indirect_HL);
+                return _indirect_HL;
+            }
+            set
+            {
+                _indirect_HL = value;
+                OnRegisterAccess?.Invoke(RegisterEnum.DirectAddress, AccessType.Write, _indirect_HL);
             }
         }
 
@@ -290,6 +323,30 @@ namespace AILZ80CPU
         {
             get => (byte)(SP & 0x00FF);
             set => SP = (ushort)((SP & 0xFF00) | value);
+        }
+
+        public byte PC_H
+        {
+            get => (byte)(PC >> 8);
+            set => PC = (ushort)((value << 8) | (PC & 0x00FF));
+        }
+
+        public byte PC_L
+        {
+            get => (byte)(PC & 0x00FF);
+            set => PC = (ushort)((PC & 0xFF00) | value);
+        }
+
+        public byte DirectAddress_H
+        {
+            get => (byte)(DirectAdress >> 8);
+            set => DirectAdress = (ushort)((value << 8) | (DirectAdress & 0x00FF));
+        }
+
+        public byte DirectAddress_L
+        {
+            get => (byte)(DirectAdress & 0x00FF);
+            set => DirectAdress = (ushort)((DirectAdress & 0xFF00) | value);
         }
 
         public byte IXH

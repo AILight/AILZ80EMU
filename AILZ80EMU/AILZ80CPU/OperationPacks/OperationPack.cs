@@ -29,7 +29,7 @@ namespace AILZ80CPU.OperationPacks
 
         protected static RegisterEnum Select_r(byte opCode, int position)
         {
-            var value = (opCode >> (8 - position - 3)) & 0x03;
+            var value = (opCode >> (8 - position - 3)) & 0x07;
             var register = value switch
             {
                 0x00 => RegisterEnum.B,
@@ -38,12 +38,64 @@ namespace AILZ80CPU.OperationPacks
                 0x03 => RegisterEnum.E,
                 0x04 => RegisterEnum.H,
                 0x05 => RegisterEnum.L,
-                //0x06 => RegisterEnum.HL,
+                0x06 => RegisterEnum.IndirectHL,
                 0x07 => RegisterEnum.A,
                 _ => throw new NotImplementedException()
             };
 
             return register;
+        }
+
+        protected static RegisterEnum Select_rp(byte opCode, int position)
+        {
+            var value = (opCode >> (8 - position - 2)) & 0x03;
+            var register = value switch
+            {
+                0x00 => RegisterEnum.BC,
+                0x01 => RegisterEnum.DE,
+                0x02 => RegisterEnum.HL,
+                0x03 => RegisterEnum.SP,
+                _ => throw new NotImplementedException()
+            };
+
+            return register;
+        }
+
+        protected static FlagTypeEnum Select_cc(byte opCode, int position)
+        {
+            var value = (opCode >> (8 - position - 2)) & 0x03;
+            var flagType = value switch
+            {
+                0x00 => FlagTypeEnum.NZ,
+                0x01 => FlagTypeEnum.Z,
+                0x02 => FlagTypeEnum.NC,
+                0x03 => FlagTypeEnum.C,
+                0x04 => FlagTypeEnum.PO,
+                0x05 => FlagTypeEnum.PE,
+                0x06 => FlagTypeEnum.P,
+                0x07 => FlagTypeEnum.M,
+                _ => throw new NotImplementedException()
+            };
+
+            return flagType;
+        }
+
+        protected bool IsFlagOn(FlagTypeEnum flagType)
+        {
+            var flag = flagType switch
+            {
+                FlagTypeEnum.NZ => (CPU.Register.F & (byte)FlagEnum.Zero) == 0,
+                FlagTypeEnum.Z => (CPU.Register.F & (byte)FlagEnum.Zero) != 0,
+                FlagTypeEnum.NC => (CPU.Register.F & (byte)FlagEnum.Carry) == 0,
+                FlagTypeEnum.C => (CPU.Register.F & (byte)FlagEnum.Carry) != 0,
+                FlagTypeEnum.PO => (CPU.Register.F & (byte)FlagEnum.ParityOverflow) == 0,
+                FlagTypeEnum.PE => (CPU.Register.F & (byte)FlagEnum.ParityOverflow) != 0,
+                FlagTypeEnum.P => (CPU.Register.F & (byte)FlagEnum.Sign) == 0,
+                FlagTypeEnum.M => (CPU.Register.F & (byte)FlagEnum.Sign) != 0,
+                _ => throw new ArgumentOutOfRangeException(nameof(flagType), flagType, null)
+            };
+
+            return flag;
         }
 
         protected void ExecuteINC8(RegisterEnum register)
@@ -126,6 +178,615 @@ namespace AILZ80CPU.OperationPacks
             CPU.Register.F &= (byte)~FlagEnum.AddSubtract;
 
             // キャリーフラグは変化しないので設定しない
+        }
+
+        protected void ExecuteLD(RegisterEnum leftRegister, RegisterEnum rightRegister)
+        {
+            var value = rightRegister switch
+            {
+                RegisterEnum.A => CPU.Register.A,
+                RegisterEnum.B => CPU.Register.B,
+                RegisterEnum.C => CPU.Register.C,
+                RegisterEnum.D => CPU.Register.D,
+                RegisterEnum.E => CPU.Register.E,
+                RegisterEnum.H => CPU.Register.H,
+                RegisterEnum.L => CPU.Register.L,
+                _ => throw new NotImplementedException()
+            };
+
+            switch (leftRegister)
+            {
+                case RegisterEnum.A:
+                    CPU.Register.A = value;
+                    break;
+                case RegisterEnum.B:
+                    CPU.Register.B = value;
+                    break;
+                case RegisterEnum.C:
+                    CPU.Register.C = value;
+                    break;
+                case RegisterEnum.D:
+                    CPU.Register.D = value;
+                    break;
+                case RegisterEnum.E:
+                    CPU.Register.E = value;
+                    break;
+                case RegisterEnum.H:
+                    CPU.Register.H = value;
+                    break;
+                case RegisterEnum.L:
+                    CPU.Register.L = value;
+                    break;
+            }
+        }
+
+
+        protected void ExecuteADD(RegisterEnum register)
+        {
+            var value = register switch
+            {
+                RegisterEnum.A => CPU.Register.A,
+                RegisterEnum.B => CPU.Register.B,
+                RegisterEnum.C => CPU.Register.C,
+                RegisterEnum.D => CPU.Register.D,
+                RegisterEnum.E => CPU.Register.E,
+                RegisterEnum.H => CPU.Register.H,
+                RegisterEnum.L => CPU.Register.L,
+                RegisterEnum.IndirectHL => CPU.Register.Indirect_HL,
+                _ => throw new NotImplementedException()
+            };
+
+            var originalA = CPU.Register.A;
+            var result = originalA + value;
+
+            // 結果をAレジスタに設定
+            CPU.Register.A = (byte)result;
+
+            // キャリーフラグの設定
+            if (result > 0xFF)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // ハーフキャリーフラグの設定
+            if (((originalA & 0x0F) + (originalA & 0x0F)) > 0x0F)
+            {
+                CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+            }
+
+            // ゼロフラグの設定
+            if ((byte)result == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Zero;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Zero;
+            }
+
+            // サインフラグの設定
+            if ((result & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Sign;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Sign;
+            }
+
+            // パリティ/オーバーフローフラグの設定
+            if (((originalA ^ result) & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.ParityOverflow;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.ParityOverflow;
+            }
+
+            // サブトラクトフラグをクリア
+            CPU.Register.F &= (byte)~FlagEnum.AddSubtract;
+        }
+
+        protected void ExecuteADC(RegisterEnum register)
+        {
+            var value = register switch
+            {
+                RegisterEnum.A => CPU.Register.A,
+                RegisterEnum.B => CPU.Register.B,
+                RegisterEnum.C => CPU.Register.C,
+                RegisterEnum.D => CPU.Register.D,
+                RegisterEnum.E => CPU.Register.E,
+                RegisterEnum.H => CPU.Register.H,
+                RegisterEnum.L => CPU.Register.L,
+                RegisterEnum.IndirectHL => CPU.Register.Indirect_HL,
+                _ => throw new NotImplementedException()
+            };
+
+            var originalA = CPU.Register.A;
+            var result = originalA + value + ((CPU.Register.F & (byte)FlagEnum.Carry) == (byte)FlagEnum.Carry ? 1 : 0);
+
+            // 結果をAレジスタに設定
+            CPU.Register.A = (byte)result;
+
+            // キャリーフラグの設定
+            if (result > 0xFF)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // ハーフキャリーフラグの設定
+            if (((originalA & 0x0F) + (originalA & 0x0F)) > 0x0F)
+            {
+                CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+            }
+
+            // ゼロフラグの設定
+            if ((byte)result == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Zero;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Zero;
+            }
+
+            // サインフラグの設定
+            if ((result & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Sign;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Sign;
+            }
+
+            // パリティ/オーバーフローフラグの設定
+            if (((originalA ^ result) & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.ParityOverflow;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.ParityOverflow;
+            }
+
+            // サブトラクトフラグをクリア
+            CPU.Register.F &= (byte)~FlagEnum.AddSubtract;
+        }
+
+        protected void ExecuteSUB(RegisterEnum register)
+        {
+            var value = register switch
+            {
+                RegisterEnum.A => CPU.Register.A,
+                RegisterEnum.B => CPU.Register.B,
+                RegisterEnum.C => CPU.Register.C,
+                RegisterEnum.D => CPU.Register.D,
+                RegisterEnum.E => CPU.Register.E,
+                RegisterEnum.H => CPU.Register.H,
+                RegisterEnum.L => CPU.Register.L,
+                RegisterEnum.IndirectHL => CPU.Register.Indirect_HL,
+                _ => throw new NotImplementedException()
+            };
+
+            var originalA = CPU.Register.A;
+            var result = originalA - value;
+
+            // 結果をAレジスタに設定
+            CPU.Register.A = (byte)result;
+
+            // キャリーフラグの設定
+            if (result < 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // ハーフキャリーフラグの設定
+            if (((originalA & 0x0F) - (value & 0x0F)) < 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+            }
+
+            // ゼロフラグの設定
+            if ((byte)result == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Zero;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Zero;
+            }
+
+            // サインフラグの設定
+            if ((result & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Sign;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Sign;
+            }
+
+            // パリティ/オーバーフローフラグの設定
+            if (((originalA ^ value) & 0x80) != 0 && ((originalA ^ result) & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.ParityOverflow;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.ParityOverflow;
+            }
+
+            // サブトラクトフラグをセット
+            CPU.Register.F |= (byte)FlagEnum.AddSubtract;
+        }
+
+        protected void ExecuteSBC(RegisterEnum register)
+        {
+            var value = register switch
+            {
+                RegisterEnum.A => CPU.Register.A,
+                RegisterEnum.B => CPU.Register.B,
+                RegisterEnum.C => CPU.Register.C,
+                RegisterEnum.D => CPU.Register.D,
+                RegisterEnum.E => CPU.Register.E,
+                RegisterEnum.H => CPU.Register.H,
+                RegisterEnum.L => CPU.Register.L,
+                RegisterEnum.IndirectHL => CPU.Register.Indirect_HL,
+                _ => throw new NotImplementedException()
+            };
+
+            var originalA = CPU.Register.A;
+            var result = originalA - value - ((CPU.Register.F & (byte)FlagEnum.Carry) == (byte)FlagEnum.Carry ? 1 : 0);
+
+            // 結果をAレジスタに設定
+            CPU.Register.A = (byte)result;
+
+            // キャリーフラグの設定
+            if (result < 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // ハーフキャリーフラグの設定
+            if (((originalA & 0x0F) - (value & 0x0F)) < 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+            }
+
+            // ゼロフラグの設定
+            if ((byte)result == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Zero;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Zero;
+            }
+
+            // サインフラグの設定
+            if ((result & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Sign;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Sign;
+            }
+
+            // パリティ/オーバーフローフラグの設定
+            if (((originalA ^ value) & 0x80) != 0 && ((originalA ^ result) & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.ParityOverflow;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.ParityOverflow;
+            }
+
+            // サブトラクトフラグをセット
+            CPU.Register.F |= (byte)FlagEnum.AddSubtract;
+        }
+
+        protected void ExecuteAND(RegisterEnum register)
+        {
+            var value = register switch
+            {
+                RegisterEnum.A => CPU.Register.A,
+                RegisterEnum.B => CPU.Register.B,
+                RegisterEnum.C => CPU.Register.C,
+                RegisterEnum.D => CPU.Register.D,
+                RegisterEnum.E => CPU.Register.E,
+                RegisterEnum.H => CPU.Register.H,
+                RegisterEnum.L => CPU.Register.L,
+                RegisterEnum.IndirectHL => CPU.Register.Indirect_HL,
+                _ => throw new NotImplementedException()
+            };
+
+            var originalA = CPU.Register.A;
+            var result = (byte)(originalA & value);
+
+            // 結果をAレジスタに設定
+            CPU.Register.A = result;
+
+            // キャリーフラグのクリア
+            CPU.Register.F &= (byte)~FlagEnum.Carry;
+
+            // ハーフキャリーフラグのセット
+            CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+
+            // ゼロフラグの設定
+            if (result == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Zero;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Zero;
+            }
+
+            // サインフラグの設定
+            if ((result & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Sign;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Sign;
+            }
+
+            // パリティ/オーバーフローフラグの設定
+            if (IsParity(result))
+            {
+                CPU.Register.F |= (byte)FlagEnum.ParityOverflow;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.ParityOverflow;
+            }
+
+            // サブトラクトフラグのクリア
+            CPU.Register.F &= (byte)~FlagEnum.AddSubtract;
+        }
+
+        protected void ExecuteXOR(RegisterEnum register)
+        {
+            var value = register switch
+            {
+                RegisterEnum.A => CPU.Register.A,
+                RegisterEnum.B => CPU.Register.B,
+                RegisterEnum.C => CPU.Register.C,
+                RegisterEnum.D => CPU.Register.D,
+                RegisterEnum.E => CPU.Register.E,
+                RegisterEnum.H => CPU.Register.H,
+                RegisterEnum.L => CPU.Register.L,
+                RegisterEnum.IndirectHL => CPU.Register.Indirect_HL,
+                _ => throw new NotImplementedException()
+            };
+
+            var originalA = CPU.Register.A;
+            var result = (byte)(originalA ^ value);
+
+            // 結果をAレジスタに設定
+            CPU.Register.A = result;
+
+            // キャリーフラグのクリア
+            CPU.Register.F &= (byte)~FlagEnum.Carry;
+
+            // ハーフキャリーフラグのクリア
+            CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+
+            // ゼロフラグの設定
+            if (result == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Zero;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Zero;
+            }
+
+            // サインフラグの設定
+            if ((result & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Sign;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Sign;
+            }
+
+            // パリティ/オーバーフローフラグの設定
+            if (IsParity(result))
+            {
+                CPU.Register.F |= (byte)FlagEnum.ParityOverflow;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.ParityOverflow;
+            }
+
+            // サブトラクトフラグのクリア
+            CPU.Register.F &= (byte)~FlagEnum.AddSubtract;
+        }
+
+        protected void ExecuteOR(RegisterEnum register)
+        {
+            var value = register switch
+            {
+                RegisterEnum.A => CPU.Register.A,
+                RegisterEnum.B => CPU.Register.B,
+                RegisterEnum.C => CPU.Register.C,
+                RegisterEnum.D => CPU.Register.D,
+                RegisterEnum.E => CPU.Register.E,
+                RegisterEnum.H => CPU.Register.H,
+                RegisterEnum.L => CPU.Register.L,
+                RegisterEnum.IndirectHL => CPU.Register.Indirect_HL,
+                _ => throw new NotImplementedException()
+            };
+
+            var originalA = CPU.Register.A;
+            var result = (byte)(originalA | value);
+
+            // 結果をAレジスタに設定
+            CPU.Register.A = result;
+
+            // キャリーフラグのクリア
+            CPU.Register.F &= (byte)~FlagEnum.Carry;
+
+            // ハーフキャリーフラグのクリア
+            CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+
+            // ゼロフラグの設定
+            if (result == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Zero;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Zero;
+            }
+
+            // サインフラグの設定
+            if ((result & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Sign;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Sign;
+            }
+
+            // パリティ/オーバーフローフラグの設定
+            if (IsParity(result))
+            {
+                CPU.Register.F |= (byte)FlagEnum.ParityOverflow;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.ParityOverflow;
+            }
+
+            // サブトラクトフラグのクリア
+            CPU.Register.F &= (byte)~FlagEnum.AddSubtract;
+        }
+
+        protected void ExecuteCP(RegisterEnum register)
+        {
+            var value = register switch
+            {
+                RegisterEnum.A => CPU.Register.A,
+                RegisterEnum.B => CPU.Register.B,
+                RegisterEnum.C => CPU.Register.C,
+                RegisterEnum.D => CPU.Register.D,
+                RegisterEnum.E => CPU.Register.E,
+                RegisterEnum.H => CPU.Register.H,
+                RegisterEnum.L => CPU.Register.L,
+                RegisterEnum.IndirectHL => CPU.Register.Indirect_HL,
+                _ => throw new NotImplementedException()
+            };
+
+            var originalA = CPU.Register.A;
+            var result = originalA - value;
+
+            // 結果をAレジスタに設定しない
+            // キャリーフラグの設定
+            if (result < 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
+
+            // ハーフキャリーフラグの設定
+            if (((originalA & 0x0F) - (value & 0x0F)) < 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+            }
+
+            // ゼロフラグの設定
+            if ((byte)result == 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Zero;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Zero;
+            }
+
+            // サインフラグの設定
+            if ((result & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Sign;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Sign;
+            }
+
+            // パリティ/オーバーフローフラグの設定
+            if (((originalA ^ value) & 0x80) != 0 && ((originalA ^ result) & 0x80) != 0)
+            {
+                CPU.Register.F |= (byte)FlagEnum.ParityOverflow;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.ParityOverflow;
+            }
+
+            // サブトラクトフラグをセット
+            CPU.Register.F |= (byte)FlagEnum.AddSubtract;
+        }
+
+        // パリティチェックのヘルパーメソッド
+        private bool IsParity(byte value)
+        {
+            var parity = true;
+            while (value != 0)
+            {
+                parity = !parity;
+                value &= (byte)(value - 1);
+            }
+            return parity;
         }
 
         protected void ExecuteDEC8(RegisterEnum register)

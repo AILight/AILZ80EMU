@@ -13,6 +13,8 @@ namespace AILZ80CPU
         IX, IY, SP, PC,
         I, R,
         A, F, B, C, D, E, H, L,
-        IXH, IXL, IYH, IYL
+        IXH, IXL, IYH, IYL,
+        IndirectHL,
+        DirectAddress,
     }
 }

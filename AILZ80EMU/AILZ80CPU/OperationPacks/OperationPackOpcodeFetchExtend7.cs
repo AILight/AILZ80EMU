@@ -10,7 +10,9 @@ namespace AILZ80CPU.OperationPacks
     public class OperationPackOpcodeFetchExtend7 : OperationPack
     {
         public byte OPCode { get; set; }
-        public bool IsCarry { get; set; }
+        private bool IsCarry { get; set; }
+        private UInt16 Value1 { get; set; }
+        private UInt16 Value2 { get; set; }
 
         public OperationPackOpcodeFetchExtend7(CPUZ80 cpu)
             : base(cpu)
@@ -65,13 +67,11 @@ namespace AILZ80CPU.OperationPacks
                     IsCarry = false;
                     switch (OPCode)
                     {
-                        case 0x09:   // ADD HL, BC (ADD L, C)
-                            var tmp = CPU.Register.L + CPU.Register.C;
-                            if (tmp >= 0x100)
-                            {
-                                IsCarry = true;
-                            }
-                            CPU.Register.L = (byte)(tmp & 0xFF);
+                        case 0x09:  // ADD HL,BC
+                        case 0x19:  // ADD HL,DE
+                        case 0x29:  // ADD HL,HL
+                        case 0x39:  // ADD HL,SP
+                            Add16BitLow(Select_rp(OPCode, 2));
                             break;
                         default:
                             break;
@@ -114,13 +114,11 @@ namespace AILZ80CPU.OperationPacks
                 {
                     switch (OPCode)
                     {
-                        case 0x09:   // ADD HL, BC (ADD H, B)
-                            var tmp = CPU.Register.H + CPU.Register.B;
-                            if (IsCarry)
-                            {
-                                tmp++;
-                            }
-                            CPU.Register.H = (byte)(tmp & 0xFF);
+                        case 0x09:  // ADD HL,BC
+                        case 0x19:  // ADD HL,DE
+                        case 0x29:  // ADD HL,HL
+                        case 0x39:  // ADD HL,SP
+                            Add16BitHigh(Select_rp(OPCode, 2));
                             break;
                         default:
                             break;
@@ -129,6 +127,67 @@ namespace AILZ80CPU.OperationPacks
                 },
 
             };
+        }
+        
+        public void Add16BitLow(RegisterEnum register)
+        {
+            Value1 = CPU.Register.HL;
+            Value2 = register switch
+            {
+                RegisterEnum.BC => CPU.Register.BC,
+                RegisterEnum.DE => CPU.Register.DE,
+                RegisterEnum.SP => CPU.Register.SP,
+                _ => throw new NotImplementedException()
+            };
+            
+
+            var tmp = CPU.Register.L + (Value2 & 0x00FF);
+            if (tmp >= 0x100)
+            {
+                IsCarry = true;
+            }
+            SetFlagForAdd16(tmp);
+            CPU.Register.L = (byte)(tmp & 0xFF);
+        }
+
+        public void Add16BitHigh(RegisterEnum register)
+        {
+            var reg = register switch
+            {
+                RegisterEnum.BC => CPU.Register.B,
+                RegisterEnum.DE => CPU.Register.D,
+                RegisterEnum.SP => CPU.Register.SP_H,
+                _ => throw new NotImplementedException()
+            };
+
+            var tmp = CPU.Register.H + reg;
+            if (IsCarry)
+            {
+                tmp++;
+            }
+            CPU.Register.H = (byte)(tmp & 0xFF);
+            SetFlagForAdd16(tmp);
+        }
+
+        public void SetFlagForAdd16(int value)
+        {
+            if (((Value1 & 0x0FFF) + (Value2 & 0x0FFF)) > 0x0FFF)
+            {
+                CPU.Register.F |= (byte)FlagEnum.HalfCarry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.HalfCarry;
+            }
+
+            if (value > 0xFF)
+            {
+                CPU.Register.F |= (byte)FlagEnum.Carry;
+            }
+            else
+            {
+                CPU.Register.F &= (byte)~FlagEnum.Carry;
+            }
         }
 
         public void SetOPCode(byte opCode)
