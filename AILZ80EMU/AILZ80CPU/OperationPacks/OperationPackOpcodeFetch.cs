@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -166,6 +167,8 @@ namespace AILZ80CPU.OperationPacks
                         case 0xD1:  // POP DE
                         case 0xE1:  // POP HL
                         case 0xF1:  // POP AF
+                            OperationPackReadMemory16.SetOPCode(opCode, RegisterEnum.SP);
+                            result = OperationPackReadMemory16;
                             break;
                         case 0x80:  // ADD A,B
                         case 0x81:  // ADD A,C
@@ -323,6 +326,36 @@ namespace AILZ80CPU.OperationPacks
                         case 0xF8:  // RET M
                             OperationPackOpcodeFetchExtend1.SetOPCode(opCode);
                             result = OperationPackOpcodeFetchExtend1;
+                            break;
+                        case 0xC3:  // JP n'n
+                        case 0xC2:  // JP NZ,n'n
+                        case 0xD2:  // JP NC,n'n
+                        case 0xE2:  // JP PO,n'n
+                        case 0xF2:  // JP P,n'n
+                        case 0xCA:  // JP Z,n'n
+                        case 0xDA:  // JP C,n'n
+                        case 0xEA:  // JP PE,n'n
+                        case 0xFA:  // JP M,n'n
+                            OperationPackReadMemory16.SetOPCode(opCode);
+                            result = OperationPackReadMemory16;
+                            break;
+                        case 0xC4:  // CALL NZ,n'n
+                        case 0xD4:  // CALL NC,n'n
+                        case 0xE4:  // CALL PO,n'n
+                        case 0xF4:  // CALL P,n'n
+                        case 0xCC:  // CALL Z,n'n
+                        case 0xDC:  // CALL C,n'n
+                        case 0xEC:  // CALL PE,n'n
+                        case 0xFC:  // CALL M,n'n
+                            if (IsFlagOn(Select_cc(opCode, 2)))
+                            {
+
+                            }
+                            else
+                            {
+                                OperationPackReadMemory16.SetOPCode(opCode);
+                                result = OperationPackReadMemory16;
+                            }
                             break;
                         default:
                             break;

@@ -51,7 +51,7 @@ namespace AILZ80CPU.OperationPacks
                             CPU.Bus.Address = CPU.Register.DirectAdress;
                             break;
                         case RegisterEnum.SP:
-                            CPU.Bus.Address = CPU.Register.PC;
+                            CPU.Bus.Address = CPU.Register.SP;
                             CPU.Register.SP--;
                             break;
                         default:
@@ -82,13 +82,19 @@ namespace AILZ80CPU.OperationPacks
                     switch (data)
                     {
                         case 0x01:  // LD BC,n'n
+                        case 0xC1:  // POP BC
                             cpu.Register.C = data;
                             break;
                         case 0x11:  // LD DE,n'n
+                        case 0xD1:  // POP DE
                             cpu.Register.E = data;
                             break;
                         case 0x21:  // LD HL,n'n
+                        case 0xE1:  // POP HL
                             cpu.Register.L = data;
+                            break;
+                        case 0xF1:  // POP AF
+                            cpu.Register.F = data;
                             break;
                         case 0x31:  // LD SP,n'n
                             cpu.Register.SP_L = data;
@@ -103,11 +109,32 @@ namespace AILZ80CPU.OperationPacks
                                 cpu.Register.L = data;
                             }
                             break;
+                        case 0xC3:  // JP n'n
+                        case 0xC2:  // JP NZ,n'n
+                        case 0xD2:  // JP NC,n'n
+                        case 0xE2:  // JP PO,n'n
+                        case 0xF2:  // JP P,n'n
+                        case 0xCA:  // JP Z,n'n
+                        case 0xDA:  // JP C,n'n
+                        case 0xEA:  // JP PE,n'n
+                        case 0xFA:  // JP M,n'n
+                            cpu.Register.DirectAddress_L = data;
+                            break;
                         case 0x3A:  // LD A,(n'n)
                             cpu.Register.DirectAddress_L = data;
                             break;
                         case 0xC9:  // RET
                             cpu.Register.PC_L = data;
+                            break;
+                        case 0xC4:  // CALL NZ,n'n
+                        case 0xD4:  // CALL NC,n'n
+                        case 0xE4:  // CALL PO,n'n
+                        case 0xF4:  // CALL P,n'n
+                        case 0xCC:  // CALL Z,n'n
+                        case 0xDC:  // CALL C,n'n
+                        case 0xEC:  // CALL PE,n'n
+                        case 0xFC:  // CALL M,n'n
+                            // フラグがFalseの時に来る
                             break;
                         default:
                             break;
@@ -131,7 +158,7 @@ namespace AILZ80CPU.OperationPacks
                             CPU.Bus.Address = (ushort)(CPU.Register.DirectAdress + 1);
                             break;
                         case RegisterEnum.SP:
-                            CPU.Bus.Address = CPU.Register.PC;
+                            CPU.Bus.Address = CPU.Register.SP;
                             CPU.Register.SP--;
                             break;
                         default:
@@ -162,13 +189,19 @@ namespace AILZ80CPU.OperationPacks
                     switch (data)
                     {
                         case 0x01:  // LD BC,n'n
+                        case 0xC1:  // POP BC
                             cpu.Register.B = data;
                             break;
                         case 0x11:  // LD DE,n'n
+                        case 0xD1:  // POP DE
                             cpu.Register.D = data;
                             break;
                         case 0x21:  // LD HL,n'n
+                        case 0xE1:  // POP HL
                             cpu.Register.H = data;
+                            break;
+                        case 0xF1:  // POP AF
+                            cpu.Register.A = data;
                             break;
                         case 0x31:  // LD SP,n'n
                             cpu.Register.SP_H = data;
@@ -185,12 +218,40 @@ namespace AILZ80CPU.OperationPacks
                                 cpu.Register.H = data;
                             }
                             break;
+                        case 0xC3:  // JP n'n
+                            cpu.Register.DirectAddress_H = data;
+                            cpu.Register.PC = cpu.Register.DirectAdress;
+                            break;
+                        case 0xC2:  // JP NZ,n'n
+                        case 0xD2:  // JP NC,n'n
+                        case 0xE2:  // JP PO,n'n
+                        case 0xF2:  // JP P,n'n
+                        case 0xCA:  // JP Z,n'n
+                        case 0xDA:  // JP C,n'n
+                        case 0xEA:  // JP PE,n'n
+                        case 0xFA:  // JP M,n'n
+                            cpu.Register.DirectAddress_H = data;
+                            if (IsFlagOn(Select_cc(OPCode, 2)))
+                            {
+                                cpu.Register.PC = cpu.Register.DirectAdress;
+                            }    
+                            break;
                         case 0x3A:  // LD A,(n'n)
                             cpu.Register.DirectAddress_H = data;
                             LocalOperationPackReadMemory8.SetOPCode(OPCode, RegisterEnum.DirectAddress);
                             return LocalOperationPackReadMemory8;
                         case 0xC9:  // RET
                             cpu.Register.PC_H = data;
+                            break;
+                        case 0xC4:  // CALL NZ,n'n
+                        case 0xD4:  // CALL NC,n'n
+                        case 0xE4:  // CALL PO,n'n
+                        case 0xF4:  // CALL P,n'n
+                        case 0xCC:  // CALL Z,n'n
+                        case 0xDC:  // CALL C,n'n
+                        case 0xEC:  // CALL PE,n'n
+                        case 0xFC:  // CALL M,n'n
+                            // フラグがFalseの時に来る
                             break;
                         default:
                             break;
