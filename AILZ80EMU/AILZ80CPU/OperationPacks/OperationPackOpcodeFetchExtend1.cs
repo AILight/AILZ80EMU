@@ -54,9 +54,8 @@ namespace AILZ80CPU.OperationPacks
                         case 0xD5:  // PUSH DE
                         case 0xE5:  // PUSH HL
                         case 0xF5:  // PUSH AF
-                            OperationPackWriteMemory16.SetOPCode(OPCode);
+                            OperationPackWriteMemory16.SetOPCode(OPCode, RegisterEnum.SP);
                             return OperationPackWriteMemory16;
-                            break;
                         default:
                             break;
                     }
