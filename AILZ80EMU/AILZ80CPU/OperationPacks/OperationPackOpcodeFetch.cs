@@ -11,9 +11,10 @@ namespace AILZ80CPU.OperationPacks
 {
     public class OperationPackOpcodeFetch : OperationPack
     {
-        private OperationPackWriteMemory8Fetch OperationPackWriteMemory8Fetch { get; set; }
         private OperationPackReadMemory8 OperationPackReadMemory8 { get; set; }
         private OperationPackReadMemory16 OperationPackReadMemory16 { get; set; }
+        private OperationPackWriteMemory8 OperationPackWriteMemory8 { get; set; }
+        private OperationPackWriteMemory16 OperationPackWriteMemory16 { get; set; }
         private OperationPackOpcodeFetchExtend1 OperationPackOpcodeFetchExtend1 { get; set; }
         private OperationPackOpcodeFetchExtend2 OperationPackOpcodeFetchExtend2 { get; set; }
         private OperationPackOpcodeFetchExtend7 OperationPackOpcodeFetchExtend7 { get; set; }
@@ -21,9 +22,11 @@ namespace AILZ80CPU.OperationPacks
         public OperationPackOpcodeFetch(CPUZ80 cpu)
             : base(cpu)
         {
-            OperationPackWriteMemory8Fetch = new OperationPackWriteMemory8Fetch(cpu);
             OperationPackReadMemory8 = new OperationPackReadMemory8(cpu);
             OperationPackReadMemory16 = new OperationPackReadMemory16(cpu);
+            OperationPackWriteMemory8 = new OperationPackWriteMemory8(cpu);
+            OperationPackWriteMemory16 = new OperationPackWriteMemory16(cpu);
+
             OperationPackOpcodeFetchExtend1 = new OperationPackOpcodeFetchExtend1(cpu);
             OperationPackOpcodeFetchExtend2 = new OperationPackOpcodeFetchExtend2(cpu);
             OperationPackOpcodeFetchExtend7 = new OperationPackOpcodeFetchExtend7(cpu);
@@ -156,8 +159,8 @@ namespace AILZ80CPU.OperationPacks
                         case 0x74:  // LD (HL),H
                         case 0x75:  // LD (HL),L
                         case 0x77:  // LD (HL),A
-                            OperationPackWriteMemory8Fetch.SetOPCode(opCode);
-                            result = OperationPackWriteMemory8Fetch;
+                            OperationPackWriteMemory8.SetOPCode(opCode);
+                            result = OperationPackWriteMemory8;
                             break;
                         case 0x3A:  // LD A,(n'n)
                             OperationPackReadMemory8.SetOPCode(opCode);
@@ -169,6 +172,13 @@ namespace AILZ80CPU.OperationPacks
                         case 0xF1:  // POP AF
                             OperationPackReadMemory16.SetOPCode(opCode, RegisterEnum.SP);
                             result = OperationPackReadMemory16;
+                            break;
+                        case 0xC5:  // PUSH BC
+                        case 0xD5:  // PUSH DE
+                        case 0xE5:  // PUSH HL
+                        case 0xF5:  // PUSH AF
+                            OperationPackOpcodeFetchExtend1.SetOPCode(opCode);
+                            result = OperationPackOpcodeFetchExtend1;
                             break;
                         case 0x80:  // ADD A,B
                         case 0x81:  // ADD A,C
@@ -347,15 +357,8 @@ namespace AILZ80CPU.OperationPacks
                         case 0xDC:  // CALL C,n'n
                         case 0xEC:  // CALL PE,n'n
                         case 0xFC:  // CALL M,n'n
-                            if (IsFlagOn(Select_cc(opCode, 2)))
-                            {
-
-                            }
-                            else
-                            {
-                                OperationPackReadMemory16.SetOPCode(opCode);
-                                result = OperationPackReadMemory16;
-                            }
+                            OperationPackReadMemory16.SetOPCode(opCode);
+                            result = OperationPackReadMemory16;
                             break;
                         default:
                             break;

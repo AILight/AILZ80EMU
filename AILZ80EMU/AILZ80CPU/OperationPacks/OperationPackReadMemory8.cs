@@ -75,7 +75,7 @@ namespace AILZ80CPU.OperationPacks
                 [TimingCycleEnum.R1_T3_H] = () =>
                 {
                     var data = CPU.Bus.Data;
-                    switch (data)
+                    switch (OPCode)
                     {
                         case 0x06:  // LD B,n
                         case 0x46:  // LD B,(HL)

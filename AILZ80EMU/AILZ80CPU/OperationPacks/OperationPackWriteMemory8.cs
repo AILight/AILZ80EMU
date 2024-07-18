@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace AILZ80CPU.OperationPacks
 {
-    public class OperationPackWriteMemory8Fetch : OperationPack
+    public class OperationPackWriteMemory8 : OperationPack
     {
         public byte OPCode { get; set; }
 
-        public OperationPackWriteMemory8Fetch(CPUZ80 cpu)
+        public OperationPackWriteMemory8(CPUZ80 cpu)
             : base(cpu)
         {
             TimingCycles = new TimingCycleEnum[] {

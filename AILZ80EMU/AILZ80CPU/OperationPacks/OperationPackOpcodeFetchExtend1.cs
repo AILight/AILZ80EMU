@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,11 +13,13 @@ namespace AILZ80CPU.OperationPacks
     {
         public byte OPCode { get; set; }
         private OperationPackReadMemory16 OperationPackReadMemory16 { get; set; }
+        private OperationPackWriteMemory16 OperationPackWriteMemory16 { get; set; }
 
         public OperationPackOpcodeFetchExtend1(CPUZ80 cpu)
             : base(cpu)
         {
             OperationPackReadMemory16 = new OperationPackReadMemory16(cpu);
+            OperationPackWriteMemory16 = new OperationPackWriteMemory16(cpu);
 
             TimingCycles = new TimingCycleEnum[] {
                                 TimingCycleEnum.M2_T1_H,
@@ -46,6 +49,13 @@ namespace AILZ80CPU.OperationPacks
                                 OperationPackReadMemory16.SetOPCode(OPCode, RegisterEnum.SP);
                                 return  OperationPackReadMemory16;
                             }
+                            break;
+                        case 0xC5:  // PUSH BC
+                        case 0xD5:  // PUSH DE
+                        case 0xE5:  // PUSH HL
+                        case 0xF5:  // PUSH AF
+                            OperationPackWriteMemory16.SetOPCode(OPCode);
+                            return OperationPackWriteMemory16;
                             break;
                         default:
                             break;

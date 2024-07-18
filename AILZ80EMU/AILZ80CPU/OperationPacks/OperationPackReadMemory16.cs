@@ -15,6 +15,7 @@ namespace AILZ80CPU.OperationPacks
         private RegisterEnum ReadRegister { get; set; }
         private OperationPackReadMemory8 LocalOperationPackReadMemory8 { get; set; }
         private OperationPackReadMemory16 LocalOperationPackReadMemory16 { get; set; }
+        private OperationPackReadMemory16Extend1 OperationPackReadMemory16Extend1 { get; set; }
 
         public OperationPackReadMemory16(CPUZ80 cpu)
         : base(cpu)
@@ -22,6 +23,7 @@ namespace AILZ80CPU.OperationPacks
         {
             LocalOperationPackReadMemory8 = new OperationPackReadMemory8(cpu);
             LocalOperationPackReadMemory16 = new OperationPackReadMemory16(cpu);
+            OperationPackReadMemory16Extend1 = new OperationPackReadMemory16Extend1(cpu);
 
             TimingCycles = new TimingCycleEnum[] {
                                 TimingCycleEnum.R1_T1_H,
@@ -52,7 +54,7 @@ namespace AILZ80CPU.OperationPacks
                             break;
                         case RegisterEnum.SP:
                             CPU.Bus.Address = CPU.Register.SP;
-                            CPU.Register.SP--;
+                            CPU.Register.SP++;
                             break;
                         default:
                             break;
@@ -79,7 +81,7 @@ namespace AILZ80CPU.OperationPacks
                 [TimingCycleEnum.R1_T3_H] = () =>
                 {
                     var data = CPU.Bus.Data;
-                    switch (data)
+                    switch (OPCode)
                     {
                         case 0x01:  // LD BC,n'n
                         case 0xC1:  // POP BC
@@ -134,7 +136,7 @@ namespace AILZ80CPU.OperationPacks
                         case 0xDC:  // CALL C,n'n
                         case 0xEC:  // CALL PE,n'n
                         case 0xFC:  // CALL M,n'n
-                            // フラグがFalseの時に来る
+                            cpu.Register.DirectAddress_L = data;
                             break;
                         default:
                             break;
@@ -159,7 +161,7 @@ namespace AILZ80CPU.OperationPacks
                             break;
                         case RegisterEnum.SP:
                             CPU.Bus.Address = CPU.Register.SP;
-                            CPU.Register.SP--;
+                            CPU.Register.SP++;
                             break;
                         default:
                             break;
@@ -251,7 +253,12 @@ namespace AILZ80CPU.OperationPacks
                         case 0xDC:  // CALL C,n'n
                         case 0xEC:  // CALL PE,n'n
                         case 0xFC:  // CALL M,n'n
-                            // フラグがFalseの時に来る
+                            cpu.Register.DirectAddress_H = data;
+                            if (IsFlagOn(Select_cc(OPCode, 2)))
+                            {
+                                OperationPackReadMemory16Extend1.SetOPCode(OPCode);
+                                return OperationPackReadMemory16Extend1;
+                            }
                             break;
                         default:
                             break;
