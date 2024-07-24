@@ -26,8 +26,9 @@ namespace AILZ80CPU.InstructionSet
             var instructionItems = new[]
             {
                 //new InstructionItem("r ← r'", OpCodeEnum.LD, "r, r'", new []{ "01rr'" }, new[] { MachineCycleEnum.OpcodeFetch }),
-                //new InstructionItem("r ← n", OpCodeEnum.LD, "r, n", new []{ "00r110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("r ← (HL)", OpCodeEnum.LD, "r, (HL)", new []{ "01r110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                //new InstructionItem("r ← n", OpCodeEnum.LD, "r, n", new []{ "00r110","n" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                //new InstructionItem("r ← (HL)", OpCodeEnum.LD, "r, (HL)", new []{ "01r110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem(" r ← (IX+d)", OpCodeEnum.LD, "r, (IX+d)", new []{ "11011101", "01r110", "d" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
             };
 
             InstructionItems = MakeInstructionItems(instructionItems);
