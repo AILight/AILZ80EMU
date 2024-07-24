@@ -1,4 +1,5 @@
-﻿using AILZ80CPU.OperationPacks;
+﻿using AILZ80CPU.InstructionSet;
+using AILZ80CPU.OperationPacks;
 using AILZ80LIB;
 using Microsoft.Win32;
 using System;
@@ -63,6 +64,8 @@ namespace AILZ80CPU
 
         public CPUZ80(Bus bus)
         {
+            var aaa = new Z80InstractionSet();
+
             Register = new Register();
             IO = new IO(256, bus);
             Bus = bus;

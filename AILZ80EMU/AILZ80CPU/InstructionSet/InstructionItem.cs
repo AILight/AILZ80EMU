@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,6 +25,19 @@ namespace AILZ80CPU.InstructionSet
             Operand = operand;
             OperandPatterns = operandPatterns;
             MachineCycles = machineCycles;
+        }
+
+        public InstructionItem Replace(string target, string operation, string operand, string perandPattern)
+        {
+            var instructionItem = new InstructionItem(
+                Operation.Replace(target, operand),
+                OpCode,
+                Operand.Replace(target, operand),
+                OperandPatterns.Select(m => m.Replace(target, perandPattern)).ToArray(),
+                MachineCycles
+                );
+            
+            return instructionItem;
         }
     }
 }
