@@ -9,6 +9,9 @@ namespace AILZ80CPU.InstructionSet
     public enum MachineCycleEnum
     {
         OpcodeFetch,
+        Process_1,
+        Process_2,
+        Process_5,
         MemoryRead,
         MemoryWrite,
     }
