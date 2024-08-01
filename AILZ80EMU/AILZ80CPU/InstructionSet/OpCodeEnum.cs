@@ -10,7 +10,10 @@ namespace AILZ80CPU.InstructionSet
     {
         // Data Transfer Group
         LD,         // Load
+        PUSH,       // Push
+        POP,        // Pop
         EX,         // Exchange
+        EXX,         // ExchangeX
         LDI,        // Load Increment
         LDD,        // Load Decrement
 
