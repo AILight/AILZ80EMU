@@ -1,4 +1,5 @@
 ﻿using AILZ80CPU.InstructionSet;
+using AILZ80CPU.Operations;
 using AILZ80LIB;
 using Microsoft.Win32;
 using System;

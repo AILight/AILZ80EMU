@@ -1,4 +1,4 @@
-﻿using AILZ80CPU.Cycles;
+﻿using AILZ80CPU.Operations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -214,6 +214,15 @@ namespace AILZ80CPU.InstructionSet
         {
             foreach (var instructionItem in InstructionItems)
             {
+                var operationItem = new OperationItem();
+
+                foreach (var machineCycle in instructionItem.MachineCycles)
+                {
+                    operationItem.MachineCycle = machineCycle;
+                    operationItem.
+
+
+                }
 
 
             }

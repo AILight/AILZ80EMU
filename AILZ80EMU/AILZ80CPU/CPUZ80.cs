@@ -9,6 +9,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AILZ80CPU.Operations;
 
 namespace AILZ80CPU
 {
@@ -126,22 +127,22 @@ namespace AILZ80CPU
                 {
                     switch (MachineCycle.NextOperationItem.MachineCycle)
                     {
-                        case Cycles.MachineCycleEnum.OpcodeFetch:
+                        case MachineCycleEnum.OpcodeFetch:
                             MachineCycle = MachineCycleOpcodeFetch;
                             break;
-                        case Cycles.MachineCycleEnum.Process_1:
+                        case MachineCycleEnum.Process_1:
                             MachineCycle = MachineCycleOpcodeFetchExtend1;
                             break;
-                        case Cycles.MachineCycleEnum.Process_2:
+                        case MachineCycleEnum.Process_2:
                             MachineCycle = MachineCycleOpcodeFetchExtend2;
                             break;
-                        case Cycles.MachineCycleEnum.Process_5:
+                        case MachineCycleEnum.Process_5:
                             MachineCycle = MachineCycleOpcodeFetchExtend5;
                             break;
-                        case Cycles.MachineCycleEnum.MemoryRead:
+                        case MachineCycleEnum.MemoryRead:
                             MachineCycle = MachineCycleReadMemory;
                             break;
-                        case Cycles.MachineCycleEnum.MemoryWrite:
+                        case MachineCycleEnum.MemoryWrite:
                             MachineCycle = MachineCycleWriteMemory;
                             break;
                         default:

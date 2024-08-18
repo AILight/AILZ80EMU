@@ -4,18 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AILZ80CPU.Cycles
+namespace AILZ80CPU.Operations
 {
     public class OperationItem
     {
         public MachineCycleEnum MachineCycle { get; set; }
         public OperationItem? NextOperationItem { get; set; }
 
-        public OperationItem() 
+        public OperationItem()
         {
         }
 
-        public void Execute(CPUZ80 cpu)
+        public virtual void Execute(CPUZ80 cpu)
         {
 
         }
