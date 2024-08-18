@@ -5,13 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AILZ80CPU.OperationPacks
+namespace AILZ80CPU.Cycles
 {
-    public class OperationPackWriteMemory8 : OperationPack
+    public class MachineCycleMemoryWrite : MachineCycle
     {
-        public byte OPCode { get; set; }
-
-        public OperationPackWriteMemory8(CPUZ80 cpu)
+        public MachineCycleMemoryWrite(CPUZ80 cpu)
             : base(cpu)
         {
             TimingCycles = new TimingCycleEnum[] {
@@ -23,10 +21,11 @@ namespace AILZ80CPU.OperationPacks
                                 TimingCycleEnum.W1_T3_L,
                             };
 
-            TimingCycleActions = new Dictionary<TimingCycleEnum, Func<OperationPack?>>()
+            TimingCycleActions = new Dictionary<TimingCycleEnum, Action>()
             {
                 [TimingCycleEnum.W1_T1_H] = () =>
                 {
+                    /*
                     switch (OPCode)
                     {
                         case 0x02: // LD (BC),A
@@ -47,11 +46,11 @@ namespace AILZ80CPU.OperationPacks
                         default:
                             break;
                     }
-
-                    return default;
+                    */
                 },
                 [TimingCycleEnum.W1_T1_L] = () =>
                 {
+                    /*
                     switch (OPCode)
                     {
                         case 0x02: // LD (BC),A
@@ -80,39 +79,25 @@ namespace AILZ80CPU.OperationPacks
                         default:
                             break;
                     }
-
-                    CPU.MREQ = false;
-
-                    return default;
+                    */
+                    cpu.MREQ = false;
                 },
                 [TimingCycleEnum.W1_T2_H] = () =>
                 {
-                    return default;
                 },
                 [TimingCycleEnum.W1_T2_L] = () =>
                 {
-                    CPU.WR = false;
-
-                    return default;
+                    cpu.WR = false;
                 },
                 [TimingCycleEnum.W1_T3_H] = () =>
                 {
-                    return default;
                 },
                 [TimingCycleEnum.W1_T3_L] = () =>
                 {
-                    CPU.MREQ = true;
-                    CPU.WR = true;
-
-                    return default;
+                    cpu.MREQ = true;
+                    cpu.WR = true;
                 },
             };
-        }
-
-        public void SetOPCode(byte opCode)
-        {
-            OPCode = opCode;
-            ExecuteIndex = 0;
         }
     }
 }

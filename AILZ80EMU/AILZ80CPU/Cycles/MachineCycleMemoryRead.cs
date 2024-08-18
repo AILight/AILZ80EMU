@@ -5,14 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AILZ80CPU.OperationPacks
+namespace AILZ80CPU.Cycles
 {
-    public class OperationPackReadMemory8 : OperationPack
+    public class MachineCycleMemoryRead : MachineCycle
     {
-        private byte OPCode { get; set; }
-        private RegisterEnum ReadRegister { get; set; }
-
-        public OperationPackReadMemory8(CPUZ80 cpu)
+        public MachineCycleMemoryRead(CPUZ80 cpu)
             : base(cpu)
         {
             TimingCycles = new TimingCycleEnum[] {
@@ -24,10 +21,11 @@ namespace AILZ80CPU.OperationPacks
                                 TimingCycleEnum.R1_T3_L,
                             };
 
-            TimingCycleActions = new Dictionary<TimingCycleEnum, Func<OperationPack?>>()
+            TimingCycleActions = new Dictionary<TimingCycleEnum, Action>()
             {
                 [TimingCycleEnum.R1_T1_H] = () =>
                 {
+                    /*
                     switch (ReadRegister)
                     {
                         case RegisterEnum.BC:
@@ -53,28 +51,24 @@ namespace AILZ80CPU.OperationPacks
                         default:
                             break;
                     }
-                    CPU.M1 = false;
-
-                    return default;
+                    */
+                    cpu.M1 = false;
                 },
                 [TimingCycleEnum.R1_T1_L] = () =>
                 {
-                    CPU.MREQ = false;
-                    CPU.RD = false;
-
-                    return default;
+                    cpu.MREQ = false;
+                    cpu.RD = false;
                 },
                 [TimingCycleEnum.R1_T2_H] = () =>
                 {
-                    return default;
                 },
                 [TimingCycleEnum.R1_T2_L] = () =>
                 {
-                    return default;
                 },
                 [TimingCycleEnum.R1_T3_H] = () =>
                 {
-                    var data = CPU.Bus.Data;
+                    var data = cpu.Bus.Data;
+                    /*
                     switch (OPCode)
                     {
                         case 0x06:  // LD B,n
@@ -143,21 +137,12 @@ namespace AILZ80CPU.OperationPacks
                         default:
                             break;
                     }
-
-                    return default;
+                    */
                 },
                 [TimingCycleEnum.R1_T3_L] = () =>
                 {
-                    return default;
                 },
             };
-        }
-
-        public void SetOPCode(byte opCode, RegisterEnum readRegister = RegisterEnum.PC)
-        {
-            OPCode = opCode;
-            ReadRegister = readRegister;
-            ExecuteIndex = 0;
         }
     }
 }

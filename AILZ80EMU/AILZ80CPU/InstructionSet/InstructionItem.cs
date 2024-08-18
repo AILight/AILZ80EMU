@@ -27,13 +27,13 @@ namespace AILZ80CPU.InstructionSet
             MachineCycles = machineCycles;
         }
 
-        public InstructionItem Replace(string target, string operation, string operand, string perandPattern)
+        public InstructionItem Replace(string operationOldValue, string operationNewValue, string operandOldValue, string operandNewValue, string OperandPatternOldValue, string OperandPatternNewValue)
         {
             var instructionItem = new InstructionItem(
-                Operation.Replace(target, operand),
+                Operation.Replace(operationOldValue, operationNewValue),
                 OpCode,
-                Operand.Replace(target, operand),
-                OperandPatterns.Select(m => m.Replace(target, perandPattern)).ToArray(),
+                Operand.Replace(operandOldValue, operandNewValue),
+                OperandPatterns.Select(m => m.Replace(OperandPatternOldValue, OperandPatternNewValue)).ToArray(),
                 MachineCycles
                 );
             
