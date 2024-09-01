@@ -212,14 +212,15 @@ namespace AILZ80CPU.InstructionSet
 
         public OperationItem CreateOperationItem()
         {
+            var operationItem = new OperationItem();
+
             foreach (var instructionItem in InstructionItems)
             {
-                var operationItem = new OperationItem();
 
                 foreach (var machineCycle in instructionItem.MachineCycles)
                 {
                     operationItem.MachineCycle = machineCycle;
-                    operationItem.
+                    //operationItem.
 
 
                 }
@@ -241,6 +242,7 @@ namespace AILZ80CPU.InstructionSet
 
             InstructionItems = result.ToArray();
         }
+
         public InstructionItem[] MakeInstructionItem(InstructionItem instructionItem)
         {
             var result = new List<InstructionItem>();

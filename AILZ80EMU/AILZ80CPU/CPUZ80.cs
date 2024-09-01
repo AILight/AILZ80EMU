@@ -60,12 +60,14 @@ namespace AILZ80CPU
         public Bus Bus { get; internal set; }
 
         private MachineCycle? MachineCycle { get; set; } = default;
+        /*
         private MachineCycleOpcodeFetch MachineCycleOpcodeFetch { get; set; }
         private MachineCycleProcess1 MachineCycleOpcodeFetchExtend1 { get; set; }
         private MachineCycleProcess2 MachineCycleOpcodeFetchExtend2 { get; set; }
         private MachineCycleProcess5 MachineCycleOpcodeFetchExtend5 { get; set; }
         private MachineCycleMemoryRead MachineCycleReadMemory { get; set; }
         private MachineCycleMemoryWrite MachineCycleWriteMemory { get; set; }
+        */
 
         private OperationItem BaseOperationItem { get; set; }
 
@@ -75,12 +77,14 @@ namespace AILZ80CPU
             var z80InstractionSet = new Z80InstractionSet();
             BaseOperationItem = z80InstractionSet.CreateOperationItem();
 
+            /*
             MachineCycleOpcodeFetch = new MachineCycleOpcodeFetch(this);
             MachineCycleOpcodeFetchExtend1 = new MachineCycleProcess1(this);
             MachineCycleOpcodeFetchExtend2 = new MachineCycleProcess2(this);
             MachineCycleOpcodeFetchExtend5 = new MachineCycleProcess5(this);
             MachineCycleReadMemory = new MachineCycleMemoryRead(this);
             MachineCycleWriteMemory = new MachineCycleMemoryWrite(this);
+            */
 
             Register = new Register();
             IO = new IO(256, bus);
@@ -104,8 +108,8 @@ namespace AILZ80CPU
             Bus.M1 = M1;
             Bus.RFSH = RFSH;
 
-            MachineCycle = MachineCycleOpcodeFetch;
-            MachineCycle.Initialize(BaseOperationItem);
+            //MachineCycle = MachineCycleOpcodeFetch;
+            //MachineCycle.Initialize(BaseOperationItem);
         }
 
         public override void ExecuteClock(bool clockState)
@@ -113,6 +117,7 @@ namespace AILZ80CPU
             base.ExecuteClock(clockState);
 
 
+            /*
             MachineCycle!.Execute();
 
             if (MachineCycle.IsEnd)
@@ -151,6 +156,7 @@ namespace AILZ80CPU
                     MachineCycle.Initialize(MachineCycle.NextOperationItem!);
                 }
             }
+            */
         }
     }
 }
