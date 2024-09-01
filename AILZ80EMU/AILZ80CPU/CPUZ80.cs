@@ -118,12 +118,16 @@ namespace AILZ80CPU
 
 
             /*
-            MachineCycle!.Execute();
+            MachineCycle
+            !.Execute();
 
             if (MachineCycle.IsEnd)
             {
                 if (MachineCycle.NextOperationItem == default)
                 {
+
+
+
                     // 最初に戻る
                     MachineCycle = MachineCycleOpcodeFetch;
                     MachineCycle.Initialize(BaseOperationItem);
