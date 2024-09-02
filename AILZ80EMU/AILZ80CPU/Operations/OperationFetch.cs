@@ -25,7 +25,7 @@ namespace AILZ80CPU.Operations
                 {
                     var oprationItem = OperationItems[opCode];
                     oprationItem.Execute(cpu);
-                    NextOperationItem = oprationItem.NextOperationItem;
+                    //NextOperationItem = oprationItem.NextOperationItem;
                 }
             }
         }
