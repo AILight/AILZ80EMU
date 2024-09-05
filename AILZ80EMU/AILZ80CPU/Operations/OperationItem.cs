@@ -8,9 +8,9 @@ namespace AILZ80CPU.Operations
 {
     public class OperationItem
     {
-        public MachineCycleEnum MachineCycle { get; set; }
-        public bool IsEnd => (TimingCycles?.Length ?? 0) <= ExecuteIndex;
+        //public MachineCycleEnum MachineCycle { get; set; }
         //public OperationItem? NextOperationItem { get; set; }
+        public bool IsEnd => (TimingCycles?.Length ?? 0) <= ExecuteIndex;
 
         public OperationItem()
         {

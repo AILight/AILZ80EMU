@@ -71,6 +71,7 @@ namespace AILZ80CPU
 
         private OperationItem BaseOperationItem { get; set; }
         private OperationItem ExecuteOperationItem { get; set; }
+        private Queue<OperationItem> OperationItemQueue { get; set; } = new Queue<OperationItem>();
 
         public CPUZ80(Bus bus)
         {
@@ -119,11 +120,16 @@ namespace AILZ80CPU
             base.ExecuteClock(clockState);
 
             MachineCycle!.Execute();
+            ExecuteOperationItem.Execute(this);
+
+
             if (MachineCycle.IsEnd)
             {
-                if (ExecuteOperationItem.;
+                //if (ExecuteOperationItem.;
 
             }
+            else
+            { }    
 
 
                 //BaseOperationItem.Execute(this);
