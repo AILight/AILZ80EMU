@@ -409,7 +409,7 @@ namespace AILZ80CPU
             set => _internal_op_code = value;
         }
 
-        public ushort Internal_memory_pointer
+        public ushort Internal_Memory_Pointer
         {
             get => _internal_memory_pointer;
             set => _internal_memory_pointer = value;
