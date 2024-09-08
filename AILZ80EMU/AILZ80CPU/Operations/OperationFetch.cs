@@ -10,24 +10,26 @@ namespace AILZ80CPU.Operations
     {
         private Dictionary<byte, OperationItem> OperationItems { get; set; }
 
-        public OperationFetch(Dictionary<byte, OperationItem> operationItems)
+        public OperationFetch(OperationItem[] operationItems)
         {
-            MachineCycle = MachineCycleEnum.OpcodeFetch;
-            OperationItems = operationItems;
+            MachineCycles = new[] { MachineCycleEnum.OpcodeFetch };
+            OperationItems = operationItems.ToDictionary(m => m.OpeCode, m => m);
         }
 
-        public override void Execute(CPUZ80 cpu)
+        public override OperationItem Execute(CPUZ80 cpu, int machineCycleIndex)
         {
             if (cpu.TimingCycle == TimingCycleEnum.M1_T2_L)
             {
                 var opCode = cpu.Bus.Data;
+                cpu.Register.Internal_OpCode = opCode;
                 if (OperationItems.ContainsKey(opCode))
                 {
                     var oprationItem = OperationItems[opCode];
-                    oprationItem.Execute(cpu);
-                    //NextOperationItem = oprationItem.NextOperationItem;
+                    return oprationItem.Execute(cpu, machineCycleIndex);
                 }
             }
+
+            return this;
         }
     }
 }

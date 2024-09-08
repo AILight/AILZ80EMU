@@ -57,21 +57,20 @@ namespace AILZ80CPU
 
         public ushort Address { get; set; }
         public byte Data { get; set; }
+
         public Bus Bus { get; internal set; }
 
         private MachineCycle? MachineCycle { get; set; } = default;
-        /*
         private MachineCycleOpcodeFetch MachineCycleOpcodeFetch { get; set; }
         private MachineCycleProcess1 MachineCycleOpcodeFetchExtend1 { get; set; }
         private MachineCycleProcess2 MachineCycleOpcodeFetchExtend2 { get; set; }
         private MachineCycleProcess5 MachineCycleOpcodeFetchExtend5 { get; set; }
         private MachineCycleMemoryRead MachineCycleReadMemory { get; set; }
         private MachineCycleMemoryWrite MachineCycleWriteMemory { get; set; }
-        */
 
         private OperationItem BaseOperationItem { get; set; }
         private OperationItem ExecuteOperationItem { get; set; }
-        private Queue<OperationItem> OperationItemQueue { get; set; } = new Queue<OperationItem>();
+        private int ExecuteOperationItemMachineCycleIndex { get; set; }
 
         public CPUZ80(Bus bus)
         {
@@ -80,14 +79,12 @@ namespace AILZ80CPU
             BaseOperationItem = z80InstractionSet.CreateOperationItem();
             ExecuteOperationItem = BaseOperationItem;
 
-            /*
             MachineCycleOpcodeFetch = new MachineCycleOpcodeFetch(this);
             MachineCycleOpcodeFetchExtend1 = new MachineCycleProcess1(this);
             MachineCycleOpcodeFetchExtend2 = new MachineCycleProcess2(this);
             MachineCycleOpcodeFetchExtend5 = new MachineCycleProcess5(this);
             MachineCycleReadMemory = new MachineCycleMemoryRead(this);
             MachineCycleWriteMemory = new MachineCycleMemoryWrite(this);
-            */
 
             Register = new Register();
             IO = new IO(256, bus);
@@ -111,8 +108,9 @@ namespace AILZ80CPU
             Bus.M1 = M1;
             Bus.RFSH = RFSH;
 
-            //MachineCycle = MachineCycleOpcodeFetch;
-            //MachineCycle.Initialize(BaseOperationItem);
+            MachineCycle = MachineCycleOpcodeFetch;
+            MachineCycle.Initialize();
+            ExecuteOperationItemMachineCycleIndex = 0;
         }
 
         public override void ExecuteClock(bool clockState)
@@ -120,63 +118,46 @@ namespace AILZ80CPU
             base.ExecuteClock(clockState);
 
             MachineCycle!.Execute();
-            ExecuteOperationItem.Execute(this);
-
+            ExecuteOperationItem = ExecuteOperationItem.Execute(this, ExecuteOperationItemMachineCycleIndex); // 処理を実行する
 
             if (MachineCycle.IsEnd)
             {
-                //if (ExecuteOperationItem.;
-
-            }
-            else
-            { }    
-
-
-                //BaseOperationItem.Execute(this);
-
-                /*
-                MachineCycle!.Execute();
-
-                if (MachineCycle.IsEnd)
+                ExecuteOperationItemMachineCycleIndex++;
+                if (ExecuteOperationItem.MachineCycles.Length >= ExecuteOperationItemMachineCycleIndex)
                 {
-                    if (MachineCycle.NextOperationItem == default)
-                    {
-
-
-
-                        // 最初に戻る
-                        MachineCycle = MachineCycleOpcodeFetch;
-                        MachineCycle.Initialize(BaseOperationItem);
-                    }
-                    else
-                    {
-                        switch (MachineCycle.NextOperationItem.MachineCycle)
-                        {
-                            case MachineCycleEnum.OpcodeFetch:
-                                MachineCycle = MachineCycleOpcodeFetch;
-                                break;
-                            case MachineCycleEnum.Process_1:
-                                MachineCycle = MachineCycleOpcodeFetchExtend1;
-                                break;
-                            case MachineCycleEnum.Process_2:
-                                MachineCycle = MachineCycleOpcodeFetchExtend2;
-                                break;
-                            case MachineCycleEnum.Process_5:
-                                MachineCycle = MachineCycleOpcodeFetchExtend5;
-                                break;
-                            case MachineCycleEnum.MemoryRead:
-                                MachineCycle = MachineCycleReadMemory;
-                                break;
-                            case MachineCycleEnum.MemoryWrite:
-                                MachineCycle = MachineCycleWriteMemory;
-                                break;
-                            default:
-                                throw new InvalidOperationException();
-                        }
-                        MachineCycle.Initialize(MachineCycle.NextOperationItem!);
-                    }
+                    MachineCycle = MachineCycleOpcodeFetch;
+                    MachineCycle.Initialize();
+                    ExecuteOperationItemMachineCycleIndex = 0;
                 }
-                */
+                else
+                {
+                    switch (ExecuteOperationItem.MachineCycles[ExecuteOperationItemMachineCycleIndex])
+                    {
+                        case MachineCycleEnum.OpcodeFetch:
+                            MachineCycle = MachineCycleOpcodeFetch;
+                            break;
+                        case MachineCycleEnum.Process_1:
+                            MachineCycle = MachineCycleOpcodeFetchExtend1;
+                            break;
+                        case MachineCycleEnum.Process_2:
+                            MachineCycle = MachineCycleOpcodeFetchExtend2;
+                            break;
+                        case MachineCycleEnum.Process_5:
+                            MachineCycle = MachineCycleOpcodeFetchExtend5;
+                            break;
+                        case MachineCycleEnum.MemoryRead:
+                            MachineCycle = MachineCycleReadMemory;
+                            break;
+                        case MachineCycleEnum.MemoryWrite:
+                            MachineCycle = MachineCycleWriteMemory;
+                            break;
+                        default:
+                            throw new InvalidOperationException();
+
+                    }
+                    MachineCycle.Initialize();
+                }
             }
+        }
     }
 }

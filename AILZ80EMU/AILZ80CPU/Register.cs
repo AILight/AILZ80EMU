@@ -33,10 +33,16 @@ namespace AILZ80CPU
         private byte _i;
         private byte _r;
 
+        // Internal OpCode
+        private byte _internal_op_code;
+        // Internal Memory Pointer
+        private ushort _internal_memory_pointer;
+
         // nn レジスタ
-        private ushort _direct_address;
+        //private ushort _direct_address;
+        
         // (HL) 読み取り値
-        private byte _indirect_HL;
+        //private byte _indirect_HL;
 
         // トラップハンドラ
         public Action<RegisterEnum, AccessType, ushort>? OnRegisterAccess;
@@ -209,6 +215,7 @@ namespace AILZ80CPU
             }
         }
 
+        /*
         public ushort DirectAdress
         {
             get
@@ -222,6 +229,7 @@ namespace AILZ80CPU
                 OnRegisterAccess?.Invoke(RegisterEnum.DirectAddress, AccessType.Write, _pc);
             }
         }
+        */
 
         public byte I
         {
@@ -251,6 +259,7 @@ namespace AILZ80CPU
             }
         }
 
+        /*
         public byte Indirect_HL
         {
             get
@@ -264,6 +273,7 @@ namespace AILZ80CPU
                 OnRegisterAccess?.Invoke(RegisterEnum.DirectAddress, AccessType.Write, _indirect_HL);
             }
         }
+        */
 
         public byte A
         {
@@ -337,6 +347,7 @@ namespace AILZ80CPU
             set => PC = (ushort)((PC & 0xFF00) | value);
         }
 
+        /*
         public byte DirectAddress_H
         {
             get => (byte)(DirectAdress >> 8);
@@ -348,6 +359,7 @@ namespace AILZ80CPU
             get => (byte)(DirectAdress & 0x00FF);
             set => DirectAdress = (ushort)((DirectAdress & 0xFF00) | value);
         }
+        */
 
         public byte IXH
         {
@@ -389,6 +401,18 @@ namespace AILZ80CPU
             BC_S = tempBC;
             DE_S = tempDE;
             HL_S = tempHL;
+        }
+
+        public byte Internal_OpCode
+        {
+            get => _internal_op_code;
+            set => _internal_op_code = value;
+        }
+
+        public ushort Internal_memory_pointer
+        {
+            get => _internal_memory_pointer;
+            set => _internal_memory_pointer = value;
         }
     }
 }

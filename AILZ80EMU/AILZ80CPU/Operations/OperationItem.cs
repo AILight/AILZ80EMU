@@ -6,19 +6,20 @@ using System.Threading.Tasks;
 
 namespace AILZ80CPU.Operations
 {
-    public class OperationItem
+    public abstract class OperationItem
     {
-        //public MachineCycleEnum MachineCycle { get; set; }
-        //public OperationItem? NextOperationItem { get; set; }
-        public bool IsEnd => (TimingCycles?.Length ?? 0) <= ExecuteIndex;
+        public byte OpeCode { get; set; }
+        public MachineCycleEnum[] MachineCycles { get; set; }
 
         public OperationItem()
         {
+            MachineCycles = new[] { MachineCycleEnum.OpcodeFetch };
         }
 
-        public virtual void Execute(CPUZ80 cpu)
+        public virtual OperationItem Execute(CPUZ80 cpu, int machineCycleIndex)
         {
-
+            return this;
         }
+
     }
 }
