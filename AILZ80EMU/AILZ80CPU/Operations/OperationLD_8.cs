@@ -106,6 +106,7 @@ namespace AILZ80CPU.Operations
             {
                 return default;
             }
+            
             var executer = default(Action<CPUZ80>);
             var operationItem = new OperationLD_8(instructionItem);
 
