@@ -9,9 +9,9 @@ namespace AILZ80CPU.Operations
 {
     public abstract class OperationItem
     {
-        public byte OpeCode { get; private set; }
-        public MachineCycleEnum[] MachineCycles { get; private set; }
+        public byte? OpeCode { get; protected set; } = default(byte?);
         public InstructionItem? InstructionItem { get; private set; }
+        protected MachineCycleEnum[] MachineCycles { get; set; }
 
         public OperationItem()
         {
@@ -30,5 +30,25 @@ namespace AILZ80CPU.Operations
             return this;
         }
 
+        public virtual MachineCycleEnum GetMachineCycleEnum(CPUZ80 cpu, int machineCycleIndex)
+        {
+            if (MachineCycles.Length > machineCycleIndex)
+            {
+                return MachineCycles[machineCycleIndex];
+            }
+            else
+            {
+                return MachineCycleEnum.None;
+            }
+        }
+
+        public static OperationItem Create(InstructionItem instructionItem)
+        {
+            var operationItem = default(OperationItem);
+            operationItem = operationItem ?? OperationLD_8.Create(instructionItem);
+            operationItem = operationItem ?? OperationLDIR.Create(instructionItem);
+
+            return operationItem;
+        }
     }
 }

@@ -26,7 +26,7 @@ namespace AILZ80CPU.InstructionSet
         {
             var instructionItems = new[]
             {
-                // 代入
+                // LD
                 new InstructionItem("r ← r'", OpCodeEnum.LD, "r, r'", new []{ "01rrrrrr'" }, new[] { MachineCycleEnum.OpcodeFetch }),
                 new InstructionItem("r ← n", OpCodeEnum.LD, "r, n", new []{ "00rrr110","nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("r ← (HL)", OpCodeEnum.LD, "r, (HL)", new []{ "01rrr110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
@@ -62,24 +62,41 @@ namespace AILZ80CPU.InstructionSet
                 new InstructionItem("SP ← HL", OpCodeEnum.LD, "SP, HL", new []{ "11111001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_2 }),
                 new InstructionItem("SP ← IX", OpCodeEnum.LD, "SP, IX", new []{ "11011101", "11111001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_2 }),
                 new InstructionItem("SP ← IY", OpCodeEnum.LD, "SP, IY", new []{ "11111101", "11111001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_2 }),
+                
+                // PUSH
                 new InstructionItem("(SP – 2) ← qqL, (SP – 1) ← qqH", OpCodeEnum.PUSH, "qq", new []{ "11qq0101" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite }),
                 new InstructionItem("(SP – 2) ← IXL, (SP – 1) ← IXH", OpCodeEnum.PUSH, "IX", new []{ "11011101", "11100101" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite }),
                 new InstructionItem("(SP – 2) ← IYL, (SP – 1) ← IYH", OpCodeEnum.PUSH, "IY", new []{ "11111101", "11100101" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite }),
+                
+                // POP
                 new InstructionItem("qqH ← (SP+1), qqL ← (SP)", OpCodeEnum.POP, "qq", new []{ "11qq0001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("IXH ← (SP+1), IXL ← (SP)", OpCodeEnum.POP, "IX", new []{ "11011101", "11100001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("IYH ← (SP+1), IYL ← (SP)", OpCodeEnum.POP, "IY", new []{ "11111101", "11100001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
+                
+                // EX
                 new InstructionItem("E ↔ HL", OpCodeEnum.EX, "DE, HL", new []{ "11101011" }, new[] { MachineCycleEnum.OpcodeFetch }),
-                new InstructionItem("(BC) ↔ (BC'), (DE) ↔ (DE'), (HL) ↔ (HL')", OpCodeEnum.EXX, "", new []{ "11011001" }, new[] { MachineCycleEnum.OpcodeFetch }),
                 new InstructionItem("H ↔ (SP+1), L ↔ (SP)", OpCodeEnum.EX, "(SP), HL", new []{ "11100011" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2 }),
                 new InstructionItem("IXH ↔ (SP+1), IXL ↔ (SP)", OpCodeEnum.EX, "(SP), IX", new []{ "11011101", "11100011" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2 }),
                 new InstructionItem("IYH ↔ (SP+1), IYL ↔ (SP)", OpCodeEnum.EX, "(SP), IY", new []{ "11111101", "11100011" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2 }),
+                
+                // EXX
+                new InstructionItem("(BC) ↔ (BC'), (DE) ↔ (DE'), (HL) ↔ (HL')", OpCodeEnum.EXX, "", new []{ "11011001" }, new[] { MachineCycleEnum.OpcodeFetch }),
+                
+                // LDI
                 new InstructionItem("(DE) ← (HL), DE ← DE + 1, HL ← HL + 1, BC ← BC – 1", OpCodeEnum.LDI, "", new []{ "11101101", "10100000" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2 }),
-                new InstructionItem("(DE) ← (HL), DE ← DE + 1, HL ← HL + 1, BC ← BC – 1", OpCodeEnum.LDIR, "", new []{ "11101101", "10100000" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2 }),
+                // LDIR
+                new InstructionItem("(DE) ← (HL), DE ← DE + 1, HL ← HL + 1, BC ← BC – 1; repeat until BC = 0 or Z", OpCodeEnum.LDIR, "", new []{ "11101101", "10100000" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2 }),
+                // LDD
                 new InstructionItem("(DE) ← (HL), DE ← DE - 1, HL ← HL - 1, BC ← BC - 1", OpCodeEnum.LDD, "", new []{ "11101101", "10101000" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2 }),
+                // LDDR
                 new InstructionItem("(DE) ← (HL), DE ← DE - 1, HL ← HL - 1, BC ← BC - 1; repeat until BC = 0 or Z", OpCodeEnum.LDDR, "", new []{ "11101101", "10111000" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2, MachineCycleEnum.Process_2 }),
+                // CPI
                 new InstructionItem("A - (HL), HL ← HL + 1, BC ← BC - 1", OpCodeEnum.CPI, "", new []{ "11101101", "10100001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_2 }),
+                // CPIR
                 new InstructionItem("A - (HL), HL ← HL + 1, BC ← BC - 1; repeat until BC = 0 or Z", OpCodeEnum.CPIR, "", new []{ "11101101", "10110001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_2, MachineCycleEnum.Process_2 }),
+                // CPD
                 new InstructionItem("A - (HL), HL ← HL - 1, BC ← BC - 1", OpCodeEnum.CPD, "", new []{ "11101101", "10101001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_2 }),
+                // CPDR
                 new InstructionItem("A - (HL), HL ← HL - 1, BC ← BC - 1; repeat until BC = 0 or Z", OpCodeEnum.CPDR, "", new []{ "11101101", "10111001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_2, MachineCycleEnum.Process_2 }),
 
                 // INC命令
@@ -206,13 +223,13 @@ namespace AILZ80CPU.InstructionSet
                 new InstructionItem("Enable Interrupts", OpCodeEnum.EI, "", new []{ "11111011" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1 }),
                 new InstructionItem("Disable Interrupts", OpCodeEnum.DI, "", new []{ "11110011" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1 })
 
+                
             };
             MakeInstructionItems(instructionItems);
         }
 
         public OperationItem CreateOperationItem()
         {
-            var baseOperationItem = new OperationFetch();
             if (InstructionItems.Any(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) > 2))
             {
                 throw new InvalidDataException();
@@ -221,11 +238,34 @@ namespace AILZ80CPU.InstructionSet
             var singleOpecodeFetch = InstructionItems.Where(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) == 1);
             var doubleOpecodeFetch = InstructionItems.Where(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) == 2);
 
+            // シングル
+            var singleOperationItemList = new List<OperationItem>();
             foreach (var instructionItem in singleOpecodeFetch)
             {
-                var operationItem = new OperationItem(instructionItem);
+                var operationItem = OperationItem.Create(instructionItem);
+                if (operationItem != default)
+                {
+                    singleOperationItemList.Add(operationItem);
+                }
             }
 
+            // ダブル
+            foreach (var instructionItems in doubleOpecodeFetch.GroupBy(m => m.OperandPatterns[0]))
+            {
+                var doubleOperationItemList = new List<OperationItem>();
+                foreach (var instructionItem in instructionItems)
+                {
+                    var operationItem = OperationItem.Create(instructionItem);
+                    if (operationItem != default)
+                    {
+                        doubleOperationItemList.Add(operationItem);
+                    }
+                }
+                var operationFetch = new OperationFetch(Convert.ToByte(instructionItems.Key, 2), doubleOperationItemList.ToArray());
+                singleOperationItemList.Add(operationFetch);
+            }
+
+            var baseOperationItem = new OperationFetch(singleOperationItemList.ToArray());
             return baseOperationItem;
         }
 

@@ -8,6 +8,7 @@ namespace AILZ80CPU
 {
     public enum MachineCycleEnum
     {
+        None,
         OpcodeFetch,
         Process_1,
         Process_2,

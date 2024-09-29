@@ -123,40 +123,37 @@ namespace AILZ80CPU
             if (MachineCycle.IsEnd)
             {
                 ExecuteOperationItemMachineCycleIndex++;
-                if (ExecuteOperationItem.MachineCycles.Length >= ExecuteOperationItemMachineCycleIndex)
+                var machineCycle = ExecuteOperationItem.GetMachineCycleEnum(this, ExecuteOperationItemMachineCycleIndex);
+                switch (machineCycle)
                 {
-                    MachineCycle = MachineCycleOpcodeFetch;
-                    MachineCycle.Initialize();
-                    ExecuteOperationItemMachineCycleIndex = 0;
-                }
-                else
-                {
-                    switch (ExecuteOperationItem.MachineCycles[ExecuteOperationItemMachineCycleIndex])
-                    {
-                        case MachineCycleEnum.OpcodeFetch:
-                            MachineCycle = MachineCycleOpcodeFetch;
-                            break;
-                        case MachineCycleEnum.Process_1:
-                            MachineCycle = MachineCycleOpcodeFetchExtend1;
-                            break;
-                        case MachineCycleEnum.Process_2:
-                            MachineCycle = MachineCycleOpcodeFetchExtend2;
-                            break;
-                        case MachineCycleEnum.Process_5:
-                            MachineCycle = MachineCycleOpcodeFetchExtend5;
-                            break;
-                        case MachineCycleEnum.MemoryRead:
-                            MachineCycle = MachineCycleReadMemory;
-                            break;
-                        case MachineCycleEnum.MemoryWrite:
-                            MachineCycle = MachineCycleWriteMemory;
-                            break;
-                        default:
-                            throw new InvalidOperationException();
+                    case MachineCycleEnum.None:
+                        MachineCycle = MachineCycleOpcodeFetch;
+                        ExecuteOperationItemMachineCycleIndex = 0;
+                        break;
+                    case MachineCycleEnum.OpcodeFetch:
+                        MachineCycle = MachineCycleOpcodeFetch;
+                        break;
+                    case MachineCycleEnum.Process_1:
+                        MachineCycle = MachineCycleOpcodeFetchExtend1;
+                        break;
+                    case MachineCycleEnum.Process_2:
+                        MachineCycle = MachineCycleOpcodeFetchExtend2;
+                        break;
+                    case MachineCycleEnum.Process_5:
+                        MachineCycle = MachineCycleOpcodeFetchExtend5;
+                        break;
+                    case MachineCycleEnum.MemoryRead:
+                        MachineCycle = MachineCycleReadMemory;
+                        break;
+                    case MachineCycleEnum.MemoryWrite:
+                        MachineCycle = MachineCycleWriteMemory;
+                        break;
+                    default:
+                        throw new InvalidOperationException();
 
-                    }
-                    MachineCycle.Initialize();
                 }
+                MachineCycle.Initialize();
+
             }
         }
     }
