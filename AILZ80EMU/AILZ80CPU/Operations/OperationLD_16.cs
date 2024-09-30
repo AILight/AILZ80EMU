@@ -42,7 +42,7 @@ namespace AILZ80CPU.Operations
         {
         }
 
-        public static OperationLD_8 Create(InstructionItem instructionItem)
+        public static OperationLD_16? Create(InstructionItem instructionItem)
         {
             if (instructionItem.OpCode != OpCodeEnum.LD)
             {
@@ -75,7 +75,14 @@ namespace AILZ80CPU.Operations
             }
             else if (cpu.TimingCycle == TimingCycleEnum.R1_T3_H)
             {
-                ExecuterForRead1?.Invoke(cpu);
+                if (machineCycleIndex == 1)
+                {
+                    ExecuterForRead1?.Invoke(cpu);
+                }
+                else
+                {
+                    ExecuterForRead2?.Invoke(cpu);
+                }
             }
 
             return this;
