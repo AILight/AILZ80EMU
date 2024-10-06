@@ -228,8 +228,26 @@ namespace AILZ80CPU.InstructionSet
             MakeInstructionItems(instructionItems);
         }
 
+        private static void SettingOperationItem(OperationFetch operationFetch, int level, InstructionItem[] instructionItems)
+        {
+            var singleOpecodeFetch = instructionItems.Where(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) == (level + 1));
+            foreach (var instructionItem in singleOpecodeFetch)
+            {
+                var operationItem = OperationItem.Create(instructionItem);
+                if (operationItem != default)
+                {
+                    operationFetch.
+                }
+            }
+        }
+
+
         public OperationItem CreateOperationItem()
         {
+            var baseOperationItem = new OperationFetch();
+            SettingOperationItem(baseOperationItem, 0, InstructionItems);
+
+
             if (InstructionItems.Any(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) > 2))
             {
                 throw new InvalidDataException();

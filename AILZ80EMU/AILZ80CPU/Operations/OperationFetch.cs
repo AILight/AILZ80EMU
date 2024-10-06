@@ -10,6 +10,12 @@ namespace AILZ80CPU.Operations
     {
         private Dictionary<byte, OperationItem> OperationItems { get; set; }
 
+        public OperationFetch()
+        {
+            OperationItems = new Dictionary<byte, OperationItem>();
+        }
+
+        /*
         public OperationFetch(byte baseOpeCode, OperationItem[] operationItems)
             : this(operationItems)
         {
@@ -22,6 +28,7 @@ namespace AILZ80CPU.Operations
             MachineCycles = new[] { MachineCycleEnum.OpcodeFetch };
             OperationItems = operationItems.ToDictionary(m => m.OpeCode!.Value, m => m);
         }
+        */
 
         public override OperationItem Execute(CPUZ80 cpu, int machineCycleIndex)
         {
