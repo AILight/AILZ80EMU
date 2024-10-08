@@ -230,13 +230,24 @@ namespace AILZ80CPU.InstructionSet
 
         private static void SettingOperationItem(OperationFetch operationFetch, int level, InstructionItem[] instructionItems)
         {
-            var singleOpecodeFetch = instructionItems.Where(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) == (level + 1));
-            foreach (var instructionItem in singleOpecodeFetch)
+            var singleOpecodeFetchInstructionItems = instructionItems.Where(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) == level);
+            foreach (var instructionItem in singleOpecodeFetchInstructionItems)
             {
                 var operationItem = OperationItem.Create(instructionItem);
                 if (operationItem != default)
                 {
-                    operationFetch.
+                    operationFetch.AddOperationItem(operationItem);
+                }
+            }
+            var nextLevelOpecodeFetchInstructionItems = instructionItems.Where(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) == (level + 1)).GroupBy(m => m.OperandPatterns[level - 1]);
+            if (nextLevelOpecodeFetchInstructionItems.Any())
+            {
+                foreach (var item in nextLevelOpecodeFetchInstructionItems)
+                {
+                    var nextLevelOperationFetch = new OperationFetch(Convert.ToByte(item.Key, 2));
+                    operationFetch.AddOperationItem(nextLevelOperationFetch);
+
+                    SettingOperationItem(nextLevelOperationFetch, level + 1, item.ToArray());
                 }
             }
         }
