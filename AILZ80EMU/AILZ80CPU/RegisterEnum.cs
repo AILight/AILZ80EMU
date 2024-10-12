@@ -16,5 +16,6 @@ namespace AILZ80CPU
         IXH, IXL, IYH, IYL,
         IndirectHL,
         DirectAddress,
+        Internal_8bit_Register,
     }
 }

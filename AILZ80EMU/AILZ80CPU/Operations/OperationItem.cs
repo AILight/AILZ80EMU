@@ -54,6 +54,7 @@ namespace AILZ80CPU.Operations
             operationItem = operationItem ?? OperationPOP.Create(instructionItem);
             operationItem = operationItem ?? OperationEX.Create(instructionItem);
             operationItem = operationItem ?? OperationEXX.Create(instructionItem);
+            operationItem = operationItem ?? OperationINC.Create(instructionItem);
 
             return operationItem;
         }

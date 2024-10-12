@@ -391,6 +391,31 @@ namespace AILZ80CPU
             set => IY = (ushort)((IY & 0xFF00) | value);
         }
 
+        // フラグをセットするメソッド
+        public void SetFlag(FlagEnum flagEnum)
+        {
+            F |= (byte)flagEnum;
+        }
+
+        // フラグをクリアするメソッド
+        public void ClearFlag(FlagEnum flagEnum)
+        {
+            F &= (byte)~flagEnum;
+        }
+
+        // フラグを条件で設定するメソッド
+        public void UpdateFlag(FlagEnum flagEnum, bool condition)
+        {
+            if (condition)
+            {
+                F |= (byte)flagEnum; // フラグをセット
+            }
+            else
+            {
+                F &= (byte)~flagEnum; // フラグをクリア
+            }
+        }
+
         public void SwapMainAndShadowRegisters()
         {
             ushort tempBC = BC;
@@ -404,6 +429,102 @@ namespace AILZ80CPU
             BC_S = tempBC;
             DE_S = tempDE;
             HL_S = tempHL;
+        }
+
+        public void INC_8(RegisterEnum register)
+        {
+            var value = default(byte);
+            switch (register)
+            {
+                case RegisterEnum.A:
+                    value = A;
+                    break;
+                case RegisterEnum.B:
+                    value = B;
+                    break;
+                case RegisterEnum.C:
+                    value = C;
+                    break;
+                case RegisterEnum.D:
+                    value = D;
+                    break;
+                case RegisterEnum.E:
+                    value = E;
+                    break;
+                case RegisterEnum.H:
+                    value = H;
+                    break;
+                case RegisterEnum.L:
+                    value = L;
+                    break;
+                case RegisterEnum.IXH:
+                    value = IXH;
+                    break;
+                case RegisterEnum.IXL:
+                    value = IXL;
+                    break;
+                case RegisterEnum.IYH:
+                    value = IYH;
+                    break;
+                case RegisterEnum.IYL:
+                    value = IYL;
+                    break;
+                case RegisterEnum.Internal_8bit_Register:
+                    value = Internal_8bit_Register;
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+            var newValue = (byte)(value + 1);
+
+            UpdateFlag(FlagEnum.Zero, newValue == 0);
+            UpdateFlag(FlagEnum.Sign, (newValue & 0x80) != 0);
+            UpdateFlag(FlagEnum.HalfCarry, (value & 0x80) != 0);
+            UpdateFlag(FlagEnum.ParityOverflow, value == 0x7F);
+            UpdateFlag(FlagEnum.AddSubtract, false);
+
+            switch (register)
+            {
+                case RegisterEnum.A:
+                    A = newValue;
+                    break;
+                case RegisterEnum.B:
+                    B = newValue;
+                    break;
+                case RegisterEnum.C:
+                    C = newValue;
+                    break;
+                case RegisterEnum.D:
+                    D = newValue;
+                    break;
+                case RegisterEnum.E:
+                    E = newValue;
+                    break;
+                case RegisterEnum.H:
+                    H = newValue;
+                    break;
+                case RegisterEnum.L:
+                    L = newValue;
+                    break;
+                case RegisterEnum.IXH:
+                    IXH = newValue;
+                    break;
+                case RegisterEnum.IXL:
+                    IXL = newValue;
+                    break;
+                case RegisterEnum.IYH:
+                    IYH = newValue;
+                    break;
+                case RegisterEnum.IYL:
+                    IYL = newValue;
+                    break;
+                case RegisterEnum.Internal_8bit_Register:
+                    Internal_8bit_Register = newValue;
+                    break;
+
+                default:
+                    throw new InvalidOperationException();
+            }
         }
 
         public byte Internal_OpCode
