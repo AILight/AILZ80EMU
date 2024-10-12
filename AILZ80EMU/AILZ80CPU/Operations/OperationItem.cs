@@ -20,6 +20,8 @@ namespace AILZ80CPU.Operations
 
         public OperationItem(InstructionItem instructionItem)
         {
+            var opcodeFetchCount = instructionItem.MachineCycles.Count(m => m == MachineCycleEnum.OpcodeFetch);
+            OpeCode = Convert.ToByte(instructionItem.OperandPatterns[opcodeFetchCount - 1], 2);
             MachineCycles = instructionItem.MachineCycles;
             InstructionItem = instructionItem;
 
@@ -46,7 +48,12 @@ namespace AILZ80CPU.Operations
         {
             var operationItem = default(OperationItem);
             operationItem = operationItem ?? OperationLD_8.Create(instructionItem);
+            operationItem = operationItem ?? OperationLD_16.Create(instructionItem);
             operationItem = operationItem ?? OperationLDIR.Create(instructionItem);
+            operationItem = operationItem ?? OperationPUSH.Create(instructionItem);
+            operationItem = operationItem ?? OperationPOP.Create(instructionItem);
+            operationItem = operationItem ?? OperationEX.Create(instructionItem);
+            operationItem = operationItem ?? OperationEXX.Create(instructionItem);
 
             return operationItem;
         }

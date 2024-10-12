@@ -1,4 +1,5 @@
-﻿using AILZ80CPU.InstructionSet;
+﻿using AILZ80CPU.Extensions;
+using AILZ80CPU.InstructionSet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,12 @@ namespace AILZ80CPU.Operations
     public class OperationLD_8 : OperationItem
     {
         private Action<CPUZ80>? ExecuterForFetch { get; set; }
-        private Action<CPUZ80>? ExecuterForRead { get; set; }
+        private Action<CPUZ80>? ExecuterForRead1 { get; set; }
+        private Action<CPUZ80>? ExecuterForRead2 { get; set; }
+        private Action<CPUZ80>? ExecuterForRead3 { get; set; }
+        private Action<CPUZ80>? ExecuterForWrite { get; set; }
 
-        private static Dictionary<string, Action<CPUZ80>> operandExecuterMapForR8R8 = new Dictionary<string, Action<CPUZ80>>()
+        private static Dictionary<string, Action<CPUZ80>> operandExecuterForFetch = new Dictionary<string, Action<CPUZ80>>()
         {
             { "A, A", (cpu) => cpu.Register.A = cpu.Register.A },
             { "A, B", (cpu) => cpu.Register.A = cpu.Register.B },
@@ -64,36 +68,62 @@ namespace AILZ80CPU.Operations
             { "L, H", (cpu) => cpu.Register.L = cpu.Register.H },
             { "L, L", (cpu) => cpu.Register.L = cpu.Register.L }
         };
-        private static Dictionary<string, Action<CPUZ80>> operandExecuterForFetch_MapForR8N = new Dictionary<string, Action<CPUZ80>>()
+
+        private static Dictionary<string, Action<CPUZ80>> operandExecuterForFetch_Regex = new Dictionary<string, Action<CPUZ80>>()
         {
-            { "A, n", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.PC; cpu.Register.PC++; } },
-            { "B, n", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.PC; cpu.Register.PC++; } },
-            { "C, n", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.PC; cpu.Register.PC++; } },
-            { "D, n", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.PC; cpu.Register.PC++; } },
-            { "E, n", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.PC; cpu.Register.PC++; } },
-            { "H, n", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.PC; cpu.Register.PC++; } },
-            { "L, n", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.PC; cpu.Register.PC++; } },
+            { @",\sn", (cpu) => { cpu.Bus.Address = cpu.Register.PC; cpu.Register.PC++; } },
+            { @",\s\(nn\)", (cpu) => { cpu.Bus.Address = cpu.Register.PC; cpu.Register.PC++; } },
+
+            { @",\sA", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.A; } },
+            { @",\sB", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.B; } },
+            { @",\sC", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.C; } },
+            { @",\sD", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.D; } },
+            { @",\sE", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.E; } },
+            { @",\sH", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.H; } },
+            { @",\sL", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.L; } },
+
+            { @",\s\(HL\)", (cpu) => { cpu.Bus.Address = cpu.Register.HL; } },
+            { @",\s\(BC\)", (cpu) => { cpu.Bus.Address = cpu.Register.BC; } },
+            { @",\s\(DE\)", (cpu) => { cpu.Bus.Address = cpu.Register.DE; } },
         };
-        private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead_MapForR8N = new Dictionary<string, Action<CPUZ80>>()
+
+        private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead1_Regex = new Dictionary<string, Action<CPUZ80>>()
         {
-            { "A, n", (cpu) => { cpu.Register.A = cpu.Bus.Data; } },
-            { "B, n", (cpu) => { cpu.Register.B = cpu.Bus.Data; } },
-            { "C, n", (cpu) => { cpu.Register.C = cpu.Bus.Data; } },
-            { "D, n", (cpu) => { cpu.Register.D = cpu.Bus.Data; } },
-            { "E, n", (cpu) => { cpu.Register.E = cpu.Bus.Data; } },
-            { "H, n", (cpu) => { cpu.Register.H = cpu.Bus.Data; } },
-            { "L, n", (cpu) => { cpu.Register.L = cpu.Bus.Data; } },
+            { @"^A,", (cpu) => { cpu.Register.A = cpu.Bus.Data; } },
+            { @"^B,", (cpu) => { cpu.Register.B = cpu.Bus.Data; } },
+            { @"^C,", (cpu) => { cpu.Register.C = cpu.Bus.Data; } },
+            { @"^D,", (cpu) => { cpu.Register.D = cpu.Bus.Data; } },
+            { @"^E,", (cpu) => { cpu.Register.E = cpu.Bus.Data; } },
+            { @"^H,", (cpu) => { cpu.Register.H = cpu.Bus.Data; } },
+            { @"^L,", (cpu) => { cpu.Register.L = cpu.Bus.Data; } },
+            { @",\sn", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Bus.Data; } },
+            { @",\s\(nn\)", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Bus.Data; cpu.Bus.Address = cpu.Register.PC; cpu.Register.PC++; } },
         };
-        private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead_MapForR8AdrHL = new Dictionary<string, Action<CPUZ80>>()
+
+        private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead2_Regex = new Dictionary<string, Action<CPUZ80>>()
         {
-            { "A, (HL)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.HL; cpu.Register.A = cpu.Bus.Data; } },
-            { "B, (HL)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.HL; cpu.Register.B = cpu.Bus.Data; } },
-            { "C, (HL)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.HL; cpu.Register.C = cpu.Bus.Data; } },
-            { "D, (HL)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.HL; cpu.Register.D = cpu.Bus.Data; } },
-            { "E, (HL)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.HL; cpu.Register.E = cpu.Bus.Data; } },
-            { "H, (HL)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.HL; cpu.Register.H = cpu.Bus.Data; } },
-            { "L, (HL)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.HL; cpu.Register.L = cpu.Bus.Data; } },
+            { @",\s\(nn\)", (cpu) => { cpu.Bus.Address = (UInt16)(cpu.Register.Internal_8bit_Register * 256 + cpu.Bus.Data); } },
         };
+
+        private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead3_Regex = new Dictionary<string, Action<CPUZ80>>()
+        {
+            { @"A,\s\(nn\)", (cpu) => { cpu.Register.A = cpu.Bus.Data; } },
+            { @"B,\s\(nn\)", (cpu) => { cpu.Register.B = cpu.Bus.Data; } },
+            { @"C,\s\(nn\)", (cpu) => { cpu.Register.C = cpu.Bus.Data; } },
+            { @"D,\s\(nn\)", (cpu) => { cpu.Register.D = cpu.Bus.Data; } },
+            { @"E,\s\(nn\)", (cpu) => { cpu.Register.E = cpu.Bus.Data; } },
+            { @"H,\s\(nn\)", (cpu) => { cpu.Register.H = cpu.Bus.Data; } },
+            { @"L,\s\(nn\)", (cpu) => { cpu.Register.L = cpu.Bus.Data; } },
+        };
+
+        private static Dictionary<string, Action<CPUZ80>> operandExecuterForWrite_Regex = new Dictionary<string, Action<CPUZ80>>()
+        {
+            { @"^\(HL\),", (cpu) => { cpu.Bus.Data = cpu.Register.Internal_8bit_Register; cpu.Register.Internal_Memory_Pointer = cpu.Register.HL; } },
+            { @"^\(DE\),", (cpu) => { cpu.Bus.Data = cpu.Register.Internal_8bit_Register; cpu.Register.Internal_Memory_Pointer = cpu.Register.DE; } },
+            { @"^\(BC\),", (cpu) => { cpu.Bus.Data = cpu.Register.Internal_8bit_Register; cpu.Register.Internal_Memory_Pointer = cpu.Register.BC; } },
+        };
+
+
 
         private OperationLD_8(InstructionItem instructionItem)
             : base(instructionItem)
@@ -110,19 +140,38 @@ namespace AILZ80CPU.Operations
             var executer = default(Action<CPUZ80>);
             var operationItem = new OperationLD_8(instructionItem);
 
-            if (operandExecuterMapForR8R8.TryGetValue(instructionItem.Operand, out executer))
+            if (operandExecuterForFetch.TryGetValue(instructionItem.Operand, out executer))
             {
                 operationItem.ExecuterForFetch = executer;
-                return operationItem;
             }
-            else if (operandExecuterForFetch_MapForR8N.TryGetValue(instructionItem.Operand, out executer))
+            else if (operandExecuterForFetch_Regex.TryGetValueRegex(instructionItem.Operand, out executer))
             {
-                operationItem.ExecuterForRead = executer;
-                return operationItem;
+                operationItem.ExecuterForFetch = executer;
             }
-            else if (operandExecuterForRead_MapForR8AdrHL.TryGetValue(instructionItem.Operand, out executer))
+            
+            if (operandExecuterForRead1_Regex.TryGetValue(instructionItem.Operand, out executer))
             {
-                operationItem.ExecuterForRead = executer;
+                operationItem.ExecuterForRead1 = executer;
+            }
+            if (operandExecuterForRead2_Regex.TryGetValue(instructionItem.Operand, out executer))
+            {
+                operationItem.ExecuterForRead2 = executer;
+            }
+            if (operandExecuterForRead3_Regex.TryGetValue(instructionItem.Operand, out executer))
+            {
+                operationItem.ExecuterForRead3 = executer;
+            }
+            if (operandExecuterForWrite_Regex.TryGetValue(instructionItem.Operand, out executer))
+            {
+                operationItem.ExecuterForWrite = executer;
+            }
+
+            if (operationItem.ExecuterForFetch != default ||
+                operationItem.ExecuterForRead1 != default ||
+                operationItem.ExecuterForRead2 != default ||
+                operationItem.ExecuterForRead3 != default ||
+                operationItem.ExecuterForWrite != default)
+            {
                 return operationItem;
             }
 
@@ -139,7 +188,22 @@ namespace AILZ80CPU.Operations
             }
             else if (cpu.TimingCycle == TimingCycleEnum.R1_T3_H)
             {
-                ExecuterForRead?.Invoke(cpu);
+                if (machineCycleIndex == 1)
+                {
+                    ExecuterForRead1?.Invoke(cpu);
+                }
+                else if (machineCycleIndex == 2)
+                {
+                    ExecuterForRead2?.Invoke(cpu);
+                }
+                else if (machineCycleIndex == 3)
+                {
+                    ExecuterForRead3?.Invoke(cpu);
+                }
+            }
+            else if (cpu.TimingCycle == TimingCycleEnum.W1_T3_H)
+            {
+                ExecuterForWrite?.Invoke(cpu);
             }
 
             return this;

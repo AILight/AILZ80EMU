@@ -38,9 +38,15 @@ namespace AILZ80CPU
         // Internal Memory Pointer
         private ushort _internal_memory_pointer;
 
+        // Internal 8bit Register
+        private byte _internal_8bit_register;
+
+        // Internal 16bit Register
+        private ushort _internal_16bit_register;
+
         // nn レジスタ
         //private ushort _direct_address;
-        
+
         // (HL) 読み取り値
         //private byte _indirect_HL;
 
@@ -124,7 +130,7 @@ namespace AILZ80CPU
                 OnRegisterAccess?.Invoke(RegisterEnum.BC_S, AccessType.Read, _bc_s);
                 return _bc_s;
             }
-            private set
+            set
             {
                 _bc_s = value;
                 OnRegisterAccess?.Invoke(RegisterEnum.BC_S, AccessType.Write, _bc_s);
@@ -387,17 +393,14 @@ namespace AILZ80CPU
 
         public void SwapMainAndShadowRegisters()
         {
-            ushort tempAF = AF;
             ushort tempBC = BC;
             ushort tempDE = DE;
             ushort tempHL = HL;
 
-            AF = AF_S;
             BC = BC_S;
             DE = DE_S;
             HL = HL_S;
 
-            AF_S = tempAF;
             BC_S = tempBC;
             DE_S = tempDE;
             HL_S = tempHL;
@@ -414,5 +417,30 @@ namespace AILZ80CPU
             get => _internal_memory_pointer;
             set => _internal_memory_pointer = value;
         }
+
+        public byte Internal_8bit_Register
+        {
+            get => _internal_8bit_register;
+            set => _internal_8bit_register = value;
+        }
+
+        public ushort Internal_16bit_Register
+        {
+            get => _internal_16bit_register;
+            set => _internal_16bit_register = value;
+        }
+
+        public byte Internal_16bit_Register_H
+        {
+            get => (byte)(Internal_16bit_Register >> 8);
+            set => Internal_16bit_Register = (ushort)((value << 8) | (Internal_16bit_Register & 0x00FF));
+        }
+
+        public byte Internal_16bit_Register_L
+        {
+            get => (byte)(Internal_16bit_Register & 0x00FF);
+            set => Internal_16bit_Register = (ushort)((Internal_16bit_Register & 0xFF00) | value);
+        }
+
     }
 }

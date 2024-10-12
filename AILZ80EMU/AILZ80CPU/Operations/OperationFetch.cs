@@ -15,20 +15,16 @@ namespace AILZ80CPU.Operations
             OperationItems = new Dictionary<byte, OperationItem>();
         }
 
-        /*
-        public OperationFetch(byte baseOpeCode, OperationItem[] operationItems)
-            : this(operationItems)
+        public OperationFetch(byte opeCode)
+            : this()
         {
-            OpeCode = baseOpeCode;
+            this.OpeCode = opeCode;
         }
 
-        public OperationFetch(OperationItem[] operationItems)
+        public void AddOperationItem(OperationItem operationItem)
         {
-            OpeCode = default;
-            MachineCycles = new[] { MachineCycleEnum.OpcodeFetch };
-            OperationItems = operationItems.ToDictionary(m => m.OpeCode!.Value, m => m);
+            OperationItems.Add(operationItem.OpeCode!.Value, operationItem);
         }
-        */
 
         public override OperationItem Execute(CPUZ80 cpu, int machineCycleIndex)
         {

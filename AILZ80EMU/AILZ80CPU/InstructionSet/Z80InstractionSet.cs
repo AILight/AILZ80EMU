@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AILZ80CPU.InstructionSet
@@ -11,7 +12,31 @@ namespace AILZ80CPU.InstructionSet
     {
         public InstructionItem[] InstructionItems { get; set; }
 
-        private Dictionary<string, string> RegisterOperandDic { get; set; } = new Dictionary<string, string>
+        private Dictionary<string, string> NumberOperandDic_b { get; set; } = new Dictionary<string, string>
+        {
+            ["0"] = "000",
+            ["1"] = "001",
+            ["2"] = "010",
+            ["3"] = "011",
+            ["4"] = "100",
+            ["5"] = "101",
+            ["6"] = "110",
+            ["7"] = "111",
+        };
+
+        private Dictionary<string, string> NumberOperandDic_p { get; set; } = new Dictionary<string, string>
+        {
+            ["00h"] = "000",
+            ["08h"] = "001",
+            ["10h"] = "010",
+            ["18h"] = "011",
+            ["20h"] = "100",
+            ["28h"] = "101",
+            ["30h"] = "110",
+            ["38h"] = "111",
+        };
+
+        private Dictionary<string, string> RegisterOperandDicFor8Bit { get; set; } = new Dictionary<string, string>
         {
             ["B"] = "000",
             ["C"] = "001",
@@ -21,6 +46,31 @@ namespace AILZ80CPU.InstructionSet
             ["L"] = "101",
             ["A"] = "111",
         };
+
+        private Dictionary<string, string> RegisterOperandDicFor16Bit_dd { get; set; } = new Dictionary<string, string>
+        {
+            ["BC"] = "00",
+            ["DE"] = "01",
+            ["HL"] = "10",
+            ["SP"] = "11",
+        };
+
+        private Dictionary<string, string> RegisterOperandDicFor16Bit_qq { get; set; } = new Dictionary<string, string>
+        {
+            ["BC"] = "00",
+            ["DE"] = "01",
+            ["HL"] = "10",
+            ["AF"] = "11",
+        };
+
+        private Dictionary<string, string> RegisterOperandDicFor16Bit_ss { get; set; } = new Dictionary<string, string>
+        {
+            ["BC"] = "00",
+            ["DE"] = "01",
+            ["HL"] = "10",
+            ["SP"] = "11",
+        };
+
 
         public Z80InstractionSet()
         {
@@ -32,9 +82,9 @@ namespace AILZ80CPU.InstructionSet
                 new InstructionItem("r ← (HL)", OpCodeEnum.LD, "r, (HL)", new []{ "01rrr110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("r ← (IX+d)", OpCodeEnum.LD, "r, (IX+d)", new []{ "11011101", "01rrr110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_5, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("r ← (IY+d)", OpCodeEnum.LD, "r, (IY+d)", new []{ "11111101", "01rrr110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_5, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("(HL) ← r", OpCodeEnum.LD, "(HL), r", new []{ "01110r" }, new[] { MachineCycleEnum.OpcodeFetch }),
-                new InstructionItem("(IX+d) ← r", OpCodeEnum.LD, "(IX+d), r", new []{ "11011101", "01110rrrr", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_5, MachineCycleEnum.MemoryWrite }),
-                new InstructionItem("(IY+d) ← r", OpCodeEnum.LD, "(IY+d), r", new []{ "11111101", "01110rrrr", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_5, MachineCycleEnum.MemoryWrite }),
+                new InstructionItem("(HL) ← r", OpCodeEnum.LD, "(HL), r", new []{ "01110rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
+                new InstructionItem("(IX+d) ← r", OpCodeEnum.LD, "(IX+d), r", new []{ "11011101", "01110rrr", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_5, MachineCycleEnum.MemoryWrite }),
+                new InstructionItem("(IY+d) ← r", OpCodeEnum.LD, "(IY+d), r", new []{ "11111101", "01110rrr", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_5, MachineCycleEnum.MemoryWrite }),
                 new InstructionItem("(HL) ← n", OpCodeEnum.LD, "(HL), n", new []{ "00110110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("(IX+d) ← n", OpCodeEnum.LD, "(IX+d), n", new []{ "11111101", "00110110", "dddddddd", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_2, MachineCycleEnum.MemoryWrite }),
                 new InstructionItem("(IY+d) ← n", OpCodeEnum.LD, "(IY+d), n", new []{ "11011101", "00110110", "dddddddd", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_2, MachineCycleEnum.MemoryWrite }),
@@ -43,7 +93,7 @@ namespace AILZ80CPU.InstructionSet
                 new InstructionItem("A ← (nn)", OpCodeEnum.LD, "A, (nn)", new []{ "00111010", "nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("(BC) ← A", OpCodeEnum.LD, "(BC), A", new []{ "00000010" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryWrite }),
                 new InstructionItem("(DE) ← A", OpCodeEnum.LD, "(DE), A", new []{ "00010010" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryWrite }),
-                new InstructionItem("(nn) ← A", OpCodeEnum.LD, "(nn), A", new []{ "00010010", "nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryWrite }),
+                new InstructionItem("(nn) ← A", OpCodeEnum.LD, "(nn), A", new []{ "00110010", "nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryWrite }),
                 new InstructionItem("A ← I", OpCodeEnum.LD, "A, I", new []{ "11101101","01010111" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1 }),
                 new InstructionItem("A ← R", OpCodeEnum.LD, "A, R", new []{ "11101101","01011111" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1 }),
                 new InstructionItem("I ← A", OpCodeEnum.LD, "I, A", new []{ "11101101","01000111" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1 }),
@@ -52,7 +102,7 @@ namespace AILZ80CPU.InstructionSet
                 new InstructionItem("IX ← nn", OpCodeEnum.LD, "IX, nn", new []{ "11011101","00100001","nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("IY ← nn", OpCodeEnum.LD, "IY, nn", new []{ "11111101","00100001","nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("H ← (nn + 1), L ← (nn)", OpCodeEnum.LD, "HL, (nn)", new []{ "00101010", "nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("ddh ← (nn + 1) ddl ← (nn)", OpCodeEnum.LD, "dd, (nn)", new []{ "11101101", "01dd1011", "nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("ddh ← (nn + 1) ddl ← (nn)", OpCodeEnum.LD, "dd, (nn)", new []{ "11101101", "01dd1011", "nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("IXh ← (nn + 1), IXI ← (nn)", OpCodeEnum.LD, "IX, (nn)", new []{ "11011101", "00101010", "nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("IYh ← (nn + 1), IYI ← (nn)", OpCodeEnum.LD, "IY, (nn)", new []{ "11111101", "00101010", "nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
                 new InstructionItem("(nn + 1) ← H, (nn) ← L", OpCodeEnum.LD, "(nn), HL", new []{ "00100010", "nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite }),
@@ -74,7 +124,8 @@ namespace AILZ80CPU.InstructionSet
                 new InstructionItem("IYH ← (SP+1), IYL ← (SP)", OpCodeEnum.POP, "IY", new []{ "11111101", "11100001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),
                 
                 // EX
-                new InstructionItem("E ↔ HL", OpCodeEnum.EX, "DE, HL", new []{ "11101011" }, new[] { MachineCycleEnum.OpcodeFetch }),
+                new InstructionItem("DE ↔ HL", OpCodeEnum.EX, "DE, HL", new []{ "11101011" }, new[] { MachineCycleEnum.OpcodeFetch }),
+                new InstructionItem("AF ↔ AF'", OpCodeEnum.EX, "AF, AF'", new []{ "00001000" }, new[] { MachineCycleEnum.OpcodeFetch }),
                 new InstructionItem("H ↔ (SP+1), L ↔ (SP)", OpCodeEnum.EX, "(SP), HL", new []{ "11100011" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2 }),
                 new InstructionItem("IXH ↔ (SP+1), IXL ↔ (SP)", OpCodeEnum.EX, "(SP), IX", new []{ "11011101", "11100011" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2 }),
                 new InstructionItem("IYH ↔ (SP+1), IYL ↔ (SP)", OpCodeEnum.EX, "(SP), IY", new []{ "11111101", "11100011" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_2 }),
@@ -205,7 +256,7 @@ namespace AILZ80CPU.InstructionSet
                 new InstructionItem("Return from Non-Maskable Interrupt", OpCodeEnum.RETN, "", new []{ "11101101", "01000101" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1 }),
 
                 // Restart Instructions
-                new InstructionItem("Restart", OpCodeEnum.RST, "p", new []{ "11pppppp" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite }),
+                new InstructionItem("Restart", OpCodeEnum.RST, "p", new []{ "11ttt111" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite }),
 
                 // Input and Output Instructions
                 new InstructionItem("A ← (n)", OpCodeEnum.IN, "A, (n)", new []{ "11011011", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_1 }),
@@ -228,6 +279,7 @@ namespace AILZ80CPU.InstructionSet
             MakeInstructionItems(instructionItems);
         }
 
+        // 階層構造の作成
         private static void SettingOperationItem(OperationFetch operationFetch, int level, InstructionItem[] instructionItems)
         {
             var singleOpecodeFetchInstructionItems = instructionItems.Where(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) == level);
@@ -237,6 +289,10 @@ namespace AILZ80CPU.InstructionSet
                 if (operationItem != default)
                 {
                     operationFetch.AddOperationItem(operationItem);
+                }
+                else
+                {
+                    throw new Exception($"Level:{level} OperationItem:{instructionItem.OpCode} {instructionItem.Operand}");
                 }
             }
             var nextLevelOpecodeFetchInstructionItems = instructionItems.Where(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) == (level + 1)).GroupBy(m => m.OperandPatterns[level - 1]);
@@ -252,49 +308,52 @@ namespace AILZ80CPU.InstructionSet
             }
         }
 
-
         public OperationItem CreateOperationItem()
         {
-            var baseOperationItem = new OperationFetch();
-            SettingOperationItem(baseOperationItem, 0, InstructionItems);
-
-
-            if (InstructionItems.Any(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) > 2))
+            // エラーチェック
+            foreach (var item in InstructionItems)
             {
-                throw new InvalidDataException();
-            }
-
-            var singleOpecodeFetch = InstructionItems.Where(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) == 1);
-            var doubleOpecodeFetch = InstructionItems.Where(m => m.MachineCycles.Count(n => n == MachineCycleEnum.OpcodeFetch) == 2);
-
-            // シングル
-            var singleOperationItemList = new List<OperationItem>();
-            foreach (var instructionItem in singleOpecodeFetch)
-            {
-                var operationItem = OperationItem.Create(instructionItem);
-                if (operationItem != default)
+                // OpcodeFetchと命令のつながりを調査
+                var opcodeFetchCount = 0;
+                foreach (var machineCycle in item.MachineCycles)
                 {
-                    singleOperationItemList.Add(operationItem);
-                }
-            }
-
-            // ダブル
-            foreach (var instructionItems in doubleOpecodeFetch.GroupBy(m => m.OperandPatterns[0]))
-            {
-                var doubleOperationItemList = new List<OperationItem>();
-                foreach (var instructionItem in instructionItems)
-                {
-                    var operationItem = OperationItem.Create(instructionItem);
-                    if (operationItem != default)
+                    // 連続するOpcodeFetchをカウントする
+                    if (machineCycle == MachineCycleEnum.OpcodeFetch)
                     {
-                        doubleOperationItemList.Add(operationItem);
+                        opcodeFetchCount++;
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
-                var operationFetch = new OperationFetch(Convert.ToByte(instructionItems.Key, 2), doubleOperationItemList.ToArray());
-                singleOperationItemList.Add(operationFetch);
+                if (opcodeFetchCount != item.MachineCycles.Count(m => m == MachineCycleEnum.OpcodeFetch))
+                {
+                    throw new Exception($"OpcodeFetchの数に間違いがあります。Operand: {item.OpCode} {item.Operand}");
+                }
+
+                var operandPatternCount = 0;
+                foreach (var operandPattern in item.OperandPatterns)
+                {
+                    if (Regex.IsMatch(operandPattern, @"^[01]+$"))
+                    {
+                        operandPatternCount++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if (opcodeFetchCount != operandPatternCount)
+                {
+                    throw new Exception($"OperandPatternsの数に間違いがあります。Operand: {item.OpCode} {item.Operand}");
+                }
             }
 
-            var baseOperationItem = new OperationFetch(singleOperationItemList.ToArray());
+            // データの積み込み
+            var baseOperationItem = new OperationFetch();
+            SettingOperationItem(baseOperationItem, 1, InstructionItems);
+
             return baseOperationItem;
         }
 
@@ -302,6 +361,7 @@ namespace AILZ80CPU.InstructionSet
         {
             var result = new List<InstructionItem>();
 
+            // 命令の展開
             foreach (var instructionItem in instructionItems)
             {
                 result.AddRange(MakeInstructionItem(instructionItem));
@@ -316,7 +376,7 @@ namespace AILZ80CPU.InstructionSet
 
             if (instructionItem.Operand.IndexOf("r'") != -1)
             {
-                foreach (var registerOperand in RegisterOperandDic)
+                foreach (var registerOperand in RegisterOperandDicFor8Bit)
                 {
                     var item = instructionItem.Replace("r'", registerOperand.Key, "r'", registerOperand.Key, "rrr'", registerOperand.Value);
                     result.AddRange(MakeInstructionItem(item));
@@ -324,9 +384,49 @@ namespace AILZ80CPU.InstructionSet
             }
             else if (instructionItem.Operand.IndexOf("r") != -1)
             {
-                foreach (var registerOperand in RegisterOperandDic)
+                foreach (var registerOperand in RegisterOperandDicFor8Bit)
                 {
                     var item = instructionItem.Replace("r", registerOperand.Key, "r", registerOperand.Key, "rrr", registerOperand.Value);
+                    result.AddRange(MakeInstructionItem(item));
+                }
+            }
+            else if (Regex.IsMatch(instructionItem.Operand, @"(?<!d)dd(?!d)"))
+            {
+                foreach (var registerOperand in RegisterOperandDicFor16Bit_dd)
+                {
+                    var item = instructionItem.Replace("dd", registerOperand.Key, "dd", registerOperand.Key, "dd", registerOperand.Value);
+                    result.AddRange(MakeInstructionItem(item));
+                }
+            }
+            else if (Regex.IsMatch(instructionItem.Operand, @"(?<!q)qq(?!q)"))
+            {
+                foreach (var registerOperand in RegisterOperandDicFor16Bit_qq)
+                {
+                    var item = instructionItem.Replace("qq", registerOperand.Key, "qq", registerOperand.Key, "qq", registerOperand.Value);
+                    result.AddRange(MakeInstructionItem(item));
+                }
+            }
+            else if (Regex.IsMatch(instructionItem.Operand, @"(?<!s)ss(?!s)"))
+            {
+                foreach (var registerOperand in RegisterOperandDicFor16Bit_ss)
+                {
+                    var item = instructionItem.Replace("ss", registerOperand.Key, "ss", registerOperand.Key, "ss", registerOperand.Value);
+                    result.AddRange(MakeInstructionItem(item));
+                }
+            }
+            else if (Regex.IsMatch(instructionItem.Operand, @"(?<!b)b(?!b)"))
+            {
+                foreach (var numberOperand in NumberOperandDic_b)
+                {
+                    var item = instructionItem.Replace("b", numberOperand.Key, "b", numberOperand.Key, "bbb", numberOperand.Value);
+                    result.AddRange(MakeInstructionItem(item));
+                }
+            }
+            else if (Regex.IsMatch(instructionItem.Operand, @"(?<!p)p(?!p)"))
+            {
+                foreach (var numberOperand in NumberOperandDic_p)
+                {
+                    var item = instructionItem.Replace("p", numberOperand.Key, "p", numberOperand.Key, "ttt", numberOperand.Value);
                     result.AddRange(MakeInstructionItem(item));
                 }
             }
