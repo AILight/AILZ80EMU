@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AILZ80CPU.Operations
 {
-    public class OperationINC : OperationItem
+    public class OperationDEC : OperationItem
     {
         private Action<CPUZ80>? ExecuterForFetch { get; set; }
         private Action<CPUZ80>? ExecuterForRead { get; set; }
@@ -16,34 +16,34 @@ namespace AILZ80CPU.Operations
 
         private static Dictionary<string, Action<CPUZ80>> operandExecuterForFetch = new Dictionary<string, Action<CPUZ80>>()
         {
-            { @"A", (cpu) => { cpu.Register.INC_8(RegisterEnum.A); } },
-            { @"B", (cpu) => { cpu.Register.INC_8(RegisterEnum.B); } },
-            { @"C", (cpu) => { cpu.Register.INC_8(RegisterEnum.C); } },
-            { @"D", (cpu) => { cpu.Register.INC_8(RegisterEnum.D); } },
-            { @"E", (cpu) => { cpu.Register.INC_8(RegisterEnum.E); } },
-            { @"H", (cpu) => { cpu.Register.INC_8(RegisterEnum.H); } },
-            { @"L", (cpu) => { cpu.Register.INC_8(RegisterEnum.L); } },
-            { @"BC", (cpu) => { cpu.Register.INC_16(RegisterEnum.BC); } },
-            { @"DE", (cpu) => { cpu.Register.INC_16(RegisterEnum.DE); } },
-            { @"HL", (cpu) => { cpu.Register.INC_16(RegisterEnum.HL); } },
-            { @"SP", (cpu) => { cpu.Register.INC_16(RegisterEnum.SP); } },
+            { @"A", (cpu) => { cpu.Register.DEC_8(RegisterEnum.A); } },
+            { @"B", (cpu) => { cpu.Register.DEC_8(RegisterEnum.B); } },
+            { @"C", (cpu) => { cpu.Register.DEC_8(RegisterEnum.C); } },
+            { @"D", (cpu) => { cpu.Register.DEC_8(RegisterEnum.D); } },
+            { @"E", (cpu) => { cpu.Register.DEC_8(RegisterEnum.E); } },
+            { @"H", (cpu) => { cpu.Register.DEC_8(RegisterEnum.H); } },
+            { @"L", (cpu) => { cpu.Register.DEC_8(RegisterEnum.L); } },
+            { @"BC", (cpu) => { cpu.Register.DEC_16(RegisterEnum.BC); } },
+            { @"DE", (cpu) => { cpu.Register.DEC_16(RegisterEnum.DE); } },
+            { @"HL", (cpu) => { cpu.Register.DEC_16(RegisterEnum.HL); } },
+            { @"SP", (cpu) => { cpu.Register.DEC_16(RegisterEnum.SP); } },
         };
 
 
-        private OperationINC(InstructionItem instructionItem)
+        private OperationDEC(InstructionItem instructionItem)
             : base(instructionItem)
         {
         }
 
-        public static new OperationINC Create(InstructionItem instructionItem)
+        public static new OperationDEC Create(InstructionItem instructionItem)
         {
-            if (instructionItem.OpCode != OpCodeEnum.INC)
+            if (instructionItem.OpCode != OpCodeEnum.DEC)
             {
                 return default!;
             }
             
             var executer = default(Action<CPUZ80>);
-            var operationItem = new OperationINC(instructionItem);
+            var operationItem = new OperationDEC(instructionItem);
 
             if (operandExecuterForFetch.TryGetValue(instructionItem.Operand, out executer))
             {
@@ -59,7 +59,7 @@ namespace AILZ80CPU.Operations
                 operationItem.ExecuterForRead = (cpu) =>
                 {
                     cpu.Register.Internal_8bit_Register = cpu.Bus.Data;
-                    cpu.Register.INC_8(RegisterEnum.Internal_8bit_Register);
+                    cpu.Register.DEC_8(RegisterEnum.Internal_8bit_Register);
                 };
                 operationItem.ExecuterForWrite = (cpu) =>
                 {

@@ -9,6 +9,8 @@ namespace AILZ80CPU
 {
     public class Register
     {
+        private static readonly bool[] ParityTable = new bool[256];
+
         // 主レジスタ
         private ushort _af;
         private ushort _bc;
@@ -52,6 +54,25 @@ namespace AILZ80CPU
 
         // トラップハンドラ
         public Action<RegisterEnum, AccessType, ushort>? OnRegisterAccess;
+
+        static Register()
+        {
+            int CountBits(int value)
+            {
+                var count = 0;
+                while (value != 0)
+                {
+                    count += value & 1;
+                    value >>= 1;
+                }
+                return count;
+            }
+
+            for (var i = 0; i < 256; i++)
+            {
+                ParityTable[i] = CountBits(i) % 2 == 0;
+            }
+        }
 
         public ushort AF
         {
@@ -391,6 +412,12 @@ namespace AILZ80CPU
             set => IY = (ushort)((IY & 0xFF00) | value);
         }
 
+        // フラグを取得するメソッド
+        public bool IsFlagSet(FlagEnum flagEnum)
+        {
+            return (F & (byte)flagEnum) != 0;
+        }
+
         // フラグをセットするメソッド
         public void SetFlag(FlagEnum flagEnum)
         {
@@ -433,97 +460,257 @@ namespace AILZ80CPU
 
         public void INC_8(RegisterEnum register)
         {
-            var value = default(byte);
+            // レジスタの値を取得
+            var value = GetRegisterValue_8(register);
+
+            // 新しい値を計算
+            var newValue = (byte)(value + 1);
+
+            // フラグの更新
+            UpdateFlag(FlagEnum.Zero, newValue == 0);
+            UpdateFlag(FlagEnum.Sign, (newValue & 0x80) != 0);
+            UpdateFlag(FlagEnum.HalfCarry, (value & 0x0F) == 0x0F);  // 下位4ビットがキャリーするかどうか
+            UpdateFlag(FlagEnum.ParityOverflow, value == 0x7F);  // オーバーフロー検出
+            UpdateFlag(FlagEnum.AddSubtract, false);  // INCは常に加算
+
+            // 新しい値をレジスタにセット
+            SetRegisterValue_8(register, newValue);
+        }
+
+        public void INC_16(RegisterEnum register)
+        {
             switch (register)
             {
-                case RegisterEnum.A:
-                    value = A;
+                case RegisterEnum.BC:
+                    BC++;
                     break;
-                case RegisterEnum.B:
-                    value = B;
+                case RegisterEnum.DE:
+                    DE++;
                     break;
-                case RegisterEnum.C:
-                    value = C;
+                case RegisterEnum.HL:
+                    HL++;
                     break;
-                case RegisterEnum.D:
-                    value = D;
+                case RegisterEnum.SP:
+                    SP++;
                     break;
-                case RegisterEnum.E:
-                    value = E;
+                case RegisterEnum.IX:
+                    IX++;
                     break;
-                case RegisterEnum.H:
-                    value = H;
-                    break;
-                case RegisterEnum.L:
-                    value = L;
-                    break;
-                case RegisterEnum.IXH:
-                    value = IXH;
-                    break;
-                case RegisterEnum.IXL:
-                    value = IXL;
-                    break;
-                case RegisterEnum.IYH:
-                    value = IYH;
-                    break;
-                case RegisterEnum.IYL:
-                    value = IYL;
-                    break;
-                case RegisterEnum.Internal_8bit_Register:
-                    value = Internal_8bit_Register;
+                case RegisterEnum.IY:
+                    IY++;
                     break;
                 default:
                     throw new InvalidOperationException();
             }
-            var newValue = (byte)(value + 1);
 
+            UpdateFlag(FlagEnum.AddSubtract, false);
+        }
+
+        public void DEC_8(RegisterEnum register)
+        {
+            // レジスタの値を取得
+            var value = GetRegisterValue_8(register);
+
+            // 新しい値を計算
+            var newValue = (byte)(value - 1);
+
+            // フラグの更新
             UpdateFlag(FlagEnum.Zero, newValue == 0);
             UpdateFlag(FlagEnum.Sign, (newValue & 0x80) != 0);
-            UpdateFlag(FlagEnum.HalfCarry, (value & 0x80) != 0);
-            UpdateFlag(FlagEnum.ParityOverflow, value == 0x7F);
-            UpdateFlag(FlagEnum.AddSubtract, false);
+            UpdateFlag(FlagEnum.HalfCarry, (value & 0x0F) == 0);  // 下位4ビットの借り判定
+            UpdateFlag(FlagEnum.ParityOverflow, value == 0x80);   // 0x80 -> 0x7F の時オーバーフロー
+            UpdateFlag(FlagEnum.AddSubtract, true);  // DECは常に減算
 
+            // 新しい値をレジスタにセット
+            SetRegisterValue_8(register, newValue);
+        }
+
+        public void DEC_16(RegisterEnum register)
+        {
             switch (register)
             {
-                case RegisterEnum.A:
-                    A = newValue;
+                case RegisterEnum.BC:
+                    BC--;
                     break;
-                case RegisterEnum.B:
-                    B = newValue;
+                case RegisterEnum.DE:
+                    DE--;
                     break;
-                case RegisterEnum.C:
-                    C = newValue;
+                case RegisterEnum.HL:
+                    HL--;
                     break;
-                case RegisterEnum.D:
-                    D = newValue;
+                case RegisterEnum.SP:
+                    SP--;
                     break;
-                case RegisterEnum.E:
-                    E = newValue;
+                case RegisterEnum.IX:
+                    IX--;
                     break;
-                case RegisterEnum.H:
-                    H = newValue;
+                case RegisterEnum.IY:
+                    IY--;
                     break;
-                case RegisterEnum.L:
-                    L = newValue;
-                    break;
-                case RegisterEnum.IXH:
-                    IXH = newValue;
-                    break;
-                case RegisterEnum.IXL:
-                    IXL = newValue;
-                    break;
-                case RegisterEnum.IYH:
-                    IYH = newValue;
-                    break;
-                case RegisterEnum.IYL:
-                    IYL = newValue;
-                    break;
-                case RegisterEnum.Internal_8bit_Register:
-                    Internal_8bit_Register = newValue;
-                    break;
-
                 default:
                     throw new InvalidOperationException();
+            }
+
+            // 16ビット命令ではフラグの影響は Add/Subtract のみ
+            UpdateFlag(FlagEnum.AddSubtract, true);
+        }
+
+        public void ADD_8(RegisterEnum register)
+        {
+            // レジスタの値を取得
+            var value = GetRegisterValue_8(register);
+
+            // Aレジスタの現在の値に加算
+            var newValue = (byte)(A + value);
+
+            // フラグの更新
+            UpdateFlag(FlagEnum.Zero, newValue == 0);
+            UpdateFlag(FlagEnum.Sign, (newValue & 0x80) != 0);
+            UpdateFlag(FlagEnum.HalfCarry, ((A & 0x0F) + (value & 0x0F)) > 0x0F); // 下位4ビットのキャリー
+            UpdateFlag(FlagEnum.ParityOverflow, ((A ^ newValue) & (value ^ newValue) & 0x80) != 0); // オーバーフロー
+            UpdateFlag(FlagEnum.Carry, (A + value) > 0xFF);   // 全体のキャリー
+            UpdateFlag(FlagEnum.AddSubtract, false);          // ADDは加算なのでリセット
+
+            // 結果をAレジスタにセット
+            A = newValue;
+        }
+
+        public void SUB_8(RegisterEnum register)
+        {
+            // レジスタの値を取得
+            var value = GetRegisterValue_8(register);
+
+            // Aレジスタの現在の値に減算
+            var newValue = (byte)(A - value);
+
+            // フラグの更新
+            UpdateFlag(FlagEnum.Zero, newValue == 0);
+            UpdateFlag(FlagEnum.Sign, (newValue & 0x80) != 0);
+            UpdateFlag(FlagEnum.HalfCarry, (A & 0x0F) < (value & 0x0F));  // 下位4ビットの借り
+            UpdateFlag(FlagEnum.ParityOverflow, ((A ^ value) & (A ^ newValue) & 0x80) != 0); // オーバーフロー検出
+            UpdateFlag(FlagEnum.Carry, A < value);  // キャリー（借り）発生かどうか
+            UpdateFlag(FlagEnum.AddSubtract, true); // SUBは減算なのでセット
+
+            // 結果をAレジスタにセット
+            A = newValue;
+        }
+
+        public void AND_8(RegisterEnum register)
+        {
+            // レジスタの値を取得
+            var value = GetRegisterValue_8(register);
+
+            // Aレジスタと指定レジスタのビット単位の論理積
+            var newValue = (byte)(A & value);
+
+            // フラグの更新
+            UpdateFlag(FlagEnum.Zero, newValue == 0);
+            UpdateFlag(FlagEnum.Sign, (newValue & 0x80) != 0);
+            UpdateFlag(FlagEnum.ParityOverflow, ParityTable[newValue]); // 事前計算されたテーブルを使用して偶数パリティを判断
+            UpdateFlag(FlagEnum.HalfCarry, true);  // AND命令は常にHalfCarryがセットされる
+            UpdateFlag(FlagEnum.Carry, false);     // AND命令はCarryをリセット
+            UpdateFlag(FlagEnum.AddSubtract, false); // AND命令は加算フラグをリセット
+
+            // 結果をAレジスタにセット
+            A = newValue;
+        }
+
+        public void OR_8(RegisterEnum register)
+        {
+            // レジスタの値を取得
+            var value = GetRegisterValue_8(register);
+
+            // Aレジスタと指定レジスタのビット単位の論理和
+            var newValue = (byte)(A | value);
+
+            // フラグの更新
+            UpdateFlag(FlagEnum.Zero, newValue == 0);
+            UpdateFlag(FlagEnum.Sign, (newValue & 0x80) != 0);
+            UpdateFlag(FlagEnum.ParityOverflow, ParityTable[newValue]);  // 事前計算されたテーブルを使用して偶数パリティを判断
+            UpdateFlag(FlagEnum.HalfCarry, false);  // OR命令はHalfCarryをリセット
+            UpdateFlag(FlagEnum.Carry, false);      // OR命令はCarryをリセット
+            UpdateFlag(FlagEnum.AddSubtract, false); // OR命令は加算/減算フラグをリセット
+
+            // 結果をAレジスタにセット
+            A = newValue;
+        }
+
+        public void XOR_8(RegisterEnum register)
+        {
+            // レジスタの値を取得
+            var value = GetRegisterValue_8(register);
+
+            // Aレジスタと指定レジスタのビット単位の排他的論理和
+            var newValue = (byte)(A ^ value);
+
+            // フラグの更新
+            UpdateFlag(FlagEnum.Zero, newValue == 0);
+            UpdateFlag(FlagEnum.Sign, (newValue & 0x80) != 0);
+            UpdateFlag(FlagEnum.ParityOverflow, ParityTable[newValue]);  // 事前計算されたテーブルを使用して偶数パリティを判断
+            UpdateFlag(FlagEnum.HalfCarry, false);  // XOR命令はHalfCarryをリセット
+            UpdateFlag(FlagEnum.Carry, false);      // XOR命令はCarryをリセット
+            UpdateFlag(FlagEnum.AddSubtract, false); // XOR命令は加算/減算フラグをリセット
+
+            // 結果をAレジスタにセット
+            A = newValue;
+        }
+
+        public void CP_8(RegisterEnum register)
+        {
+            // レジスタの値を取得
+            var value = GetRegisterValue_8(register);
+
+            // Aレジスタの現在の値を保持し、比較を実行
+            var result = (byte)(A - value);
+
+            // フラグの更新
+            UpdateFlag(FlagEnum.Zero, result == 0);                            // 結果がゼロかどうか
+            UpdateFlag(FlagEnum.Sign, (result & 0x80) != 0);                   // 結果の最上位ビット（符号ビット）
+            UpdateFlag(FlagEnum.HalfCarry, (A & 0x0F) < (value & 0x0F));       // 下位4ビットの借り
+            UpdateFlag(FlagEnum.ParityOverflow, ((A ^ value) & (A ^ result) & 0x80) != 0); // 符号付きオーバーフローの検出
+            UpdateFlag(FlagEnum.Carry, A < value);                             // キャリー（借り）発生かどうか
+            UpdateFlag(FlagEnum.AddSubtract, true);                            // CPは常に減算扱い
+
+            // Aレジスタの値は変更しない
+        }
+
+        private byte GetRegisterValue_8(RegisterEnum register)
+        {
+            return register switch
+            {
+                RegisterEnum.A => A,
+                RegisterEnum.B => B,
+                RegisterEnum.C => C,
+                RegisterEnum.D => D,
+                RegisterEnum.E => E,
+                RegisterEnum.H => H,
+                RegisterEnum.L => L,
+                RegisterEnum.IXH => IXH,
+                RegisterEnum.IXL => IXL,
+                RegisterEnum.IYH => IYH,
+                RegisterEnum.IYL => IYL,
+                RegisterEnum.Internal_8bit_Register => Internal_8bit_Register,
+                _ => throw new InvalidOperationException()
+            };
+        }
+
+        private void SetRegisterValue_8(RegisterEnum register, byte value)
+        {
+            switch (register)
+            {
+                case RegisterEnum.A: A = value; break;
+                case RegisterEnum.B: B = value; break;
+                case RegisterEnum.C: C = value; break;
+                case RegisterEnum.D: D = value; break;
+                case RegisterEnum.E: E = value; break;
+                case RegisterEnum.H: H = value; break;
+                case RegisterEnum.L: L = value; break;
+                case RegisterEnum.IXH: IXH = value; break;
+                case RegisterEnum.IXL: IXL = value; break;
+                case RegisterEnum.IYH: IYH = value; break;
+                case RegisterEnum.IYL: IYL = value; break;
+                case RegisterEnum.Internal_8bit_Register: Internal_8bit_Register = value; break;
+                default: throw new InvalidOperationException();
             }
         }
 

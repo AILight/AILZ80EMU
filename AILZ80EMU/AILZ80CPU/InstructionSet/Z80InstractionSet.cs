@@ -172,39 +172,39 @@ namespace AILZ80CPU.InstructionSet
                 new InstructionItem("A ← A + (IY+d)", OpCodeEnum.ADD, "A, (IY+d)", new []{ "11111101", "10000110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
 
                 // SUB命令
-                new InstructionItem("A ← A - r", OpCodeEnum.SUB, "A, r", new []{ "10010rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
-                new InstructionItem("A ← A - n", OpCodeEnum.SUB, "A, n", new []{ "11010110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A - (HL)", OpCodeEnum.SUB, "A, (HL)", new []{ "10010110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A - (IX+d)", OpCodeEnum.SUB, "A, (IX+d)", new []{ "11011101", "10010110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A - (IY+d)", OpCodeEnum.SUB, "A, (IY+d)", new []{ "11111101", "10010110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A - r", OpCodeEnum.SUB, "r", new []{ "10010rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
+                new InstructionItem("A ← A - n", OpCodeEnum.SUB, "n", new []{ "11010110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A - (HL)", OpCodeEnum.SUB, "(HL)", new []{ "10010110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A - (IX+d)", OpCodeEnum.SUB, "(IX+d)", new []{ "11011101", "10010110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A - (IY+d)", OpCodeEnum.SUB, "(IY+d)", new []{ "11111101", "10010110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
 
                 // AND命令
-                new InstructionItem("A ← A & r", OpCodeEnum.AND, "A, r", new []{ "10100rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
-                new InstructionItem("A ← A & n", OpCodeEnum.AND, "A, n", new []{ "11100110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A & (HL)", OpCodeEnum.AND, "A, (HL)", new []{ "10100110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A & (IX+d)", OpCodeEnum.AND, "A, (IX+d)", new []{ "11011101", "10100110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A & (IY+d)", OpCodeEnum.AND, "A, (IY+d)", new []{ "11111101", "10100110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A & r", OpCodeEnum.AND, "r", new []{ "10100rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
+                new InstructionItem("A ← A & n", OpCodeEnum.AND, "n", new []{ "11100110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A & (HL)", OpCodeEnum.AND, "(HL)", new []{ "10100110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A & (IX+d)", OpCodeEnum.AND, "(IX+d)", new []{ "11011101", "10100110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A & (IY+d)", OpCodeEnum.AND, "(IY+d)", new []{ "11111101", "10100110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
 
                 // OR命令
-                new InstructionItem("A ← A | r", OpCodeEnum.OR, "A, r", new []{ "10110rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
-                new InstructionItem("A ← A | n", OpCodeEnum.OR, "A, n", new []{ "11110110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A | (HL)", OpCodeEnum.OR, "A, (HL)", new []{ "10110110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A | (IX+d)", OpCodeEnum.OR, "A, (IX+d)", new []{ "11011101", "10110110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A | (IY+d)", OpCodeEnum.OR, "A, (IY+d)", new []{ "11111101", "10110110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A | r", OpCodeEnum.OR, "r", new []{ "10110rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
+                new InstructionItem("A ← A | n", OpCodeEnum.OR, "n", new []{ "11110110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A | (HL)", OpCodeEnum.OR, "(HL)", new []{ "10110110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A | (IX+d)", OpCodeEnum.OR, "(IX+d)", new []{ "11011101", "10110110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A | (IY+d)", OpCodeEnum.OR, "(IY+d)", new []{ "11111101", "10110110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
 
                 // XOR命令
-                new InstructionItem("A ← A ^ r", OpCodeEnum.XOR, "A, r", new []{ "10101rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
-                new InstructionItem("A ← A ^ n", OpCodeEnum.XOR, "A, n", new []{ "11101110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A ^ (HL)", OpCodeEnum.XOR, "A, (HL)", new []{ "10101110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A ^ (IX+d)", OpCodeEnum.XOR, "A, (IX+d)", new []{ "11011101", "10101110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A ← A ^ (IY+d)", OpCodeEnum.XOR, "A, (IY+d)", new []{ "11111101", "10101110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A ^ r", OpCodeEnum.XOR, "r", new []{ "10101rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
+                new InstructionItem("A ← A ^ n", OpCodeEnum.XOR, "n", new []{ "11101110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A ^ (HL)", OpCodeEnum.XOR, "(HL)", new []{ "10101110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A ^ (IX+d)", OpCodeEnum.XOR, "(IX+d)", new []{ "11011101", "10101110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A ← A ^ (IY+d)", OpCodeEnum.XOR, "(IY+d)", new []{ "11111101", "10101110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
 
                 // CP命令
-                new InstructionItem("A - r", OpCodeEnum.CP, "A, r", new []{ "10111rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
-                new InstructionItem("A - n", OpCodeEnum.CP, "A, n", new []{ "11111110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A - (HL)", OpCodeEnum.CP, "A, (HL)", new []{ "10111110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A - (IX+d)", OpCodeEnum.CP, "A, (IX+d)", new []{ "11011101", "10111110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
-                new InstructionItem("A - (IY+d)", OpCodeEnum.CP, "A, (IY+d)", new []{ "11111101", "10111110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A - r", OpCodeEnum.CP, "r", new []{ "10111rrr" }, new[] { MachineCycleEnum.OpcodeFetch }),
+                new InstructionItem("A - n", OpCodeEnum.CP, "n", new []{ "11111110", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A - (HL)", OpCodeEnum.CP, "(HL)", new []{ "10111110" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A - (IX+d)", OpCodeEnum.CP, "(IX+d)", new []{ "11011101", "10111110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
+                new InstructionItem("A - (IY+d)", OpCodeEnum.CP, "(IY+d)", new []{ "11111101", "10111110", "dddddddd" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead }),
 
                 // JP命令
                 new InstructionItem("PC ← nn", OpCodeEnum.JP, "nn", new []{ "11000011", "nnnnnnnn", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryRead }),

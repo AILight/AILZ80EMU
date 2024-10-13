@@ -55,6 +55,22 @@ namespace AILZ80CPU.Operations
             operationItem = operationItem ?? OperationEX.Create(instructionItem);
             operationItem = operationItem ?? OperationEXX.Create(instructionItem);
             operationItem = operationItem ?? OperationINC.Create(instructionItem);
+            operationItem = operationItem ?? OperationDEC.Create(instructionItem);
+            operationItem = operationItem ?? OperationADD.Create(instructionItem);
+            operationItem = operationItem ?? OperationSUB.Create(instructionItem);
+            operationItem = operationItem ?? OperationAND.Create(instructionItem);
+            operationItem = operationItem ?? OperationOR.Create(instructionItem);
+            operationItem = operationItem ?? OperationXOR.Create(instructionItem);
+            operationItem = operationItem ?? OperationCP.Create(instructionItem);
+            operationItem = operationItem ?? OperationJP.Create(instructionItem);
+            operationItem = operationItem ?? OperationJR.Create(instructionItem);
+            operationItem = operationItem ?? OperationCALL.Create(instructionItem);
+            operationItem = operationItem ?? OperationRET.Create(instructionItem);
+            operationItem = operationItem ?? OperationRLCA.Create(instructionItem);
+            operationItem = operationItem ?? OperationRLA.Create(instructionItem);
+            operationItem = operationItem ?? OperationRRCA.Create(instructionItem);
+            operationItem = operationItem ?? OperationRRA.Create(instructionItem);
+            operationItem = operationItem ?? OperationRST.Create(instructionItem);
 
             return operationItem;
         }
