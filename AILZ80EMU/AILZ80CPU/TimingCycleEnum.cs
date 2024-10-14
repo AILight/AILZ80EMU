@@ -57,5 +57,17 @@ namespace AILZ80CPU
         W2_T2_L,
         W2_T3_H,
         W2_T3_L,
+        IR_T1_H,
+        IR_T1_L,
+        IR_T2_H,
+        IR_T2_L,
+        IR_T3_H,
+        IR_T3_L,
+        IW_T1_H,
+        IW_T1_L,
+        IW_T2_H,
+        IW_T2_L,
+        IW_T3_H,
+        IW_T3_L,
     }
 }

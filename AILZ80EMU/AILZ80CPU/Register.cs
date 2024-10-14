@@ -35,6 +35,10 @@ namespace AILZ80CPU
         private byte _i;
         private byte _r;
 
+        // Interrupt Flip-Flop
+        private bool _IFF1;
+        private bool _IFF2;
+
         // Internal OpCode
         private byte _internal_op_code;
         // Internal Memory Pointer
@@ -52,8 +56,11 @@ namespace AILZ80CPU
         // (HL) 読み取り値
         //private byte _indirect_HL;
 
-        // トラップハンドラ
+        // トラップハンドラ (レジスター)
         public Action<RegisterEnum, AccessType, ushort>? OnRegisterAccess;
+
+        // トラップハンドラ (IFF)
+        public Action<int, AccessType, bool>? OnIFFAccess;
 
         static Register()
         {
@@ -242,22 +249,6 @@ namespace AILZ80CPU
             }
         }
 
-        /*
-        public ushort DirectAdress
-        {
-            get
-            {
-                OnRegisterAccess?.Invoke(RegisterEnum.DirectAddress, AccessType.Read, _pc);
-                return _direct_address;
-            }
-            set
-            {
-                _direct_address = value;
-                OnRegisterAccess?.Invoke(RegisterEnum.DirectAddress, AccessType.Write, _pc);
-            }
-        }
-        */
-
         public byte I
         {
             get
@@ -286,21 +277,33 @@ namespace AILZ80CPU
             }
         }
 
-        /*
-        public byte Indirect_HL
+        public bool IFF1  // 割り込みフリップフロップ 1
         {
             get
             {
-                OnRegisterAccess?.Invoke(RegisterEnum.IndirectHL, AccessType.Read, _indirect_HL);
-                return _indirect_HL;
+                OnIFFAccess?.Invoke(1, AccessType.Read, _IFF1);
+                return _IFF1;
             }
             set
             {
-                _indirect_HL = value;
-                OnRegisterAccess?.Invoke(RegisterEnum.DirectAddress, AccessType.Write, _indirect_HL);
+                _IFF1 = value;
+                OnIFFAccess?.Invoke(1, AccessType.Write, _IFF1);
             }
         }
-        */
+
+        public bool IFF2  // 割り込みフリップフロップ 1
+        {
+            get
+            {
+                OnIFFAccess?.Invoke(1, AccessType.Read, _IFF2);
+                return _IFF2;
+            }
+            set
+            {
+                _IFF2 = value;
+                OnIFFAccess?.Invoke(1, AccessType.Write, _IFF2);
+            }
+        }
 
         public byte A
         {
@@ -374,20 +377,6 @@ namespace AILZ80CPU
             set => PC = (ushort)((PC & 0xFF00) | value);
         }
 
-        /*
-        public byte DirectAddress_H
-        {
-            get => (byte)(DirectAdress >> 8);
-            set => DirectAdress = (ushort)((value << 8) | (DirectAdress & 0x00FF));
-        }
-
-        public byte DirectAddress_L
-        {
-            get => (byte)(DirectAdress & 0x00FF);
-            set => DirectAdress = (ushort)((DirectAdress & 0xFF00) | value);
-        }
-        */
-
         public byte IXH
         {
             get => (byte)(IX >> 8);
@@ -411,6 +400,7 @@ namespace AILZ80CPU
             get => (byte)(IY & 0x00FF);
             set => IY = (ushort)((IY & 0xFF00) | value);
         }
+
 
         // フラグを取得するメソッド
         public bool IsFlagSet(FlagEnum flagEnum)
@@ -443,7 +433,7 @@ namespace AILZ80CPU
             }
         }
 
-        public void SwapMainAndShadowRegisters()
+public void SwapMainAndShadowRegisters()
         {
             ushort tempBC = BC;
             ushort tempDE = DE;
@@ -749,6 +739,5 @@ namespace AILZ80CPU
             get => (byte)(Internal_16bit_Register & 0x00FF);
             set => Internal_16bit_Register = (ushort)((Internal_16bit_Register & 0xFF00) | value);
         }
-
     }
 }

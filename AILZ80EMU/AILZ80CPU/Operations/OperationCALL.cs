@@ -39,7 +39,7 @@ namespace AILZ80CPU.Operations
         {
             { "nn", (cpu) => {
                 cpu.Register.SP--;
-                cpu.Bus.Address = cpu.Register.SP;
+                cpu.Register.Internal_Memory_Pointer = cpu.Register.SP;
                 cpu.Bus.Data = cpu.Register.PC_H;  // PCの上位バイト（PC_H）をスタックにプッシュ
             } },
         };
@@ -48,7 +48,7 @@ namespace AILZ80CPU.Operations
         {
             { "nn", (cpu) => {
                 cpu.Register.SP--;
-                cpu.Bus.Address = cpu.Register.SP;
+                cpu.Register.Internal_Memory_Pointer = cpu.Register.SP;
                 cpu.Bus.Data = cpu.Register.PC_L;  // PCの下位バイト（PC_L）をスタックにプッシュ
                 cpu.Register.PC = cpu.Register.Internal_16bit_Register;  // ジャンプ先アドレスにジャンプ
             } },

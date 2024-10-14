@@ -25,6 +25,10 @@ namespace AILZ80CPU.Cycles
             {
                 [TimingCycleEnum.R1_T1_H] = () =>
                 {
+                   
+                    
+                    
+                    
                     cpu.Bus.Address = cpu.Register.Internal_Memory_Pointer;
                     /*
                     switch (ReadRegister)

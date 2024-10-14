@@ -13,7 +13,7 @@ namespace AILZ80CPU.Operations
         private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead1 = new Dictionary<string, Action<CPUZ80>>()
         {
             { "nn", (cpu) => {
-                cpu.Bus.Address = cpu.Register.SP;    // スタックポインタからデータを読み込む
+                cpu.Register.Internal_Memory_Pointer = cpu.Register.SP;    // スタックポインタからデータを読み込む
                 cpu.Register.PC_L = cpu.Bus.Data;     // PCの下位バイトに保存
                 cpu.Register.SP++;                    // スタックポインタをインクリメント
             } },
@@ -22,7 +22,7 @@ namespace AILZ80CPU.Operations
         private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead2 = new Dictionary<string, Action<CPUZ80>>()
         {
             { "nn", (cpu) => {
-                cpu.Bus.Address = cpu.Register.SP;    // スタックポインタからデータを読み込む
+                cpu.Register.Internal_Memory_Pointer = cpu.Register.SP;    // スタックポインタからデータを読み込む
                 cpu.Register.PC_H = cpu.Bus.Data;     // PCの上位バイトに保存
                 cpu.Register.SP++;                    // スタックポインタをインクリメント
             } },

@@ -71,8 +71,8 @@ namespace AILZ80CPU.Operations
 
         private static Dictionary<string, Action<CPUZ80>> operandExecuterForFetch_Regex = new Dictionary<string, Action<CPUZ80>>()
         {
-            { @",\sn", (cpu) => { cpu.Bus.Address = cpu.Register.PC; cpu.Register.PC++; } },
-            { @",\s\(nn\)", (cpu) => { cpu.Bus.Address = cpu.Register.PC; cpu.Register.PC++; } },
+            { @",\sn", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.PC; cpu.Register.PC++; } },
+            { @",\s\(nn\)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.PC; cpu.Register.PC++; } },
 
             { @",\sA", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.A; } },
             { @",\sB", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.B; } },
@@ -82,9 +82,9 @@ namespace AILZ80CPU.Operations
             { @",\sH", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.H; } },
             { @",\sL", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Register.L; } },
 
-            { @",\s\(HL\)", (cpu) => { cpu.Bus.Address = cpu.Register.HL; } },
-            { @",\s\(BC\)", (cpu) => { cpu.Bus.Address = cpu.Register.BC; } },
-            { @",\s\(DE\)", (cpu) => { cpu.Bus.Address = cpu.Register.DE; } },
+            { @",\s\(HL\)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.HL; } },
+            { @",\s\(BC\)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.BC; } },
+            { @",\s\(DE\)", (cpu) => { cpu.Register.Internal_Memory_Pointer = cpu.Register.DE; } },
         };
 
         private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead1_Regex = new Dictionary<string, Action<CPUZ80>>()
@@ -97,12 +97,18 @@ namespace AILZ80CPU.Operations
             { @"^H,", (cpu) => { cpu.Register.H = cpu.Bus.Data; } },
             { @"^L,", (cpu) => { cpu.Register.L = cpu.Bus.Data; } },
             { @",\sn", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Bus.Data; } },
-            { @",\s\(nn\)", (cpu) => { cpu.Register.Internal_8bit_Register = cpu.Bus.Data; cpu.Bus.Address = cpu.Register.PC; cpu.Register.PC++; } },
+            { @",\s\(nn\)", (cpu) => 
+                {
+                    cpu.Register.Internal_8bit_Register = cpu.Bus.Data;
+                    cpu.Register.Internal_Memory_Pointer = cpu.Register.PC;
+                    cpu.Register.PC++;
+                }
+            },
         };
 
         private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead2_Regex = new Dictionary<string, Action<CPUZ80>>()
         {
-            { @",\s\(nn\)", (cpu) => { cpu.Bus.Address = (UInt16)(cpu.Register.Internal_8bit_Register * 256 + cpu.Bus.Data); } },
+            { @",\s\(nn\)", (cpu) => { cpu.Register.Internal_Memory_Pointer = (UInt16)(cpu.Register.Internal_8bit_Register * 256 + cpu.Bus.Data); } },
         };
 
         private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead3_Regex = new Dictionary<string, Action<CPUZ80>>()

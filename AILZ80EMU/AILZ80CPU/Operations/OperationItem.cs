@@ -48,6 +48,8 @@ namespace AILZ80CPU.Operations
         {
             var operationItem = default(OperationItem);
             operationItem = operationItem ?? OperationLD_8.Create(instructionItem);
+            operationItem = operationItem ?? OperationLD_8_IDX.Create(instructionItem);
+            operationItem = operationItem ?? OperationLD_16_W.Create(instructionItem);
             operationItem = operationItem ?? OperationLD_16.Create(instructionItem);
             operationItem = operationItem ?? OperationLDIR.Create(instructionItem);
             operationItem = operationItem ?? OperationPUSH.Create(instructionItem);
@@ -71,6 +73,10 @@ namespace AILZ80CPU.Operations
             operationItem = operationItem ?? OperationRRCA.Create(instructionItem);
             operationItem = operationItem ?? OperationRRA.Create(instructionItem);
             operationItem = operationItem ?? OperationRST.Create(instructionItem);
+            operationItem = operationItem ?? OperationIN.Create(instructionItem);
+            operationItem = operationItem ?? OperationOUT.Create(instructionItem);
+            operationItem = operationItem ?? OperationEI.Create(instructionItem);
+            operationItem = operationItem ?? OperationDI.Create(instructionItem);
 
             return operationItem;
         }

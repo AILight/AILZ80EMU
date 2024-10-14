@@ -45,7 +45,7 @@ namespace AILZ80CPU.Operations
             {
                 // PCの上位バイトをスタックにプッシュ
                 cpu.Register.SP--;
-                cpu.Bus.Address = cpu.Register.SP;
+                cpu.Register.Internal_Memory_Pointer = cpu.Register.SP;
                 cpu.Bus.Data = cpu.Register.PC_H;
             };
 
@@ -53,7 +53,7 @@ namespace AILZ80CPU.Operations
             {
                 // PCの下位バイトをスタックにプッシュ
                 cpu.Register.SP--;
-                cpu.Bus.Address = cpu.Register.SP;
+                cpu.Register.Internal_Memory_Pointer = cpu.Register.SP;
                 cpu.Bus.Data = cpu.Register.PC_L;
             };
 

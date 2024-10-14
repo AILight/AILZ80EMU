@@ -54,7 +54,7 @@ namespace AILZ80CPU.Operations
             {
                 operationItem.ExecuterForFetch = (cpu) =>
                 {
-                    cpu.Bus.Address = cpu.Register.HL;
+                    cpu.Register.Internal_Memory_Pointer = cpu.Register.HL;
                 };
                 operationItem.ExecuterForRead = (cpu) =>
                 {

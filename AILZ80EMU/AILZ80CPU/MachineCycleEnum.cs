@@ -15,5 +15,7 @@ namespace AILZ80CPU
         Process_5,
         MemoryRead,
         MemoryWrite,
+        IORead,
+        IOWrite,
     }
 }

@@ -62,17 +62,17 @@ namespace AILZ80CPU.Operations
                 operationItem.ExecuterForRead1 = (cpu) =>
                 {
                     cpu.Register.Internal_16bit_Register_L = cpu.Bus.Data;
-                    cpu.Bus.Address = (ushort)(cpu.Register.SP + 1);
+                    cpu.Register.Internal_Memory_Pointer = (ushort)(cpu.Register.SP + 1);
                 };
                 operationItem.ExecuterForRead2 = (cpu) =>
                 {
                     cpu.Register.Internal_16bit_Register_H = cpu.Bus.Data;
-                    cpu.Bus.Address = (ushort)(cpu.Register.SP);
+                    cpu.Register.Internal_Memory_Pointer = (ushort)(cpu.Register.SP);
                 };
                 operationItem.ExecuterForWrite1 = (cpu) =>
                 {
                     cpu.Bus.Data = cpu.Register.L;
-                    cpu.Bus.Address = (ushort)(cpu.Register.SP + 1);
+                    cpu.Register.Internal_Memory_Pointer = (ushort)(cpu.Register.SP + 1);
                 };
                 operationItem.ExecuterForWrite2 = (cpu) =>
                 {

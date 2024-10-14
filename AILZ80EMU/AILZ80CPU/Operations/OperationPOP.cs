@@ -16,10 +16,10 @@ namespace AILZ80CPU.Operations
 
         private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead1 = new Dictionary<string, Action<CPUZ80>>()
         {
-            { @"BC", (cpu) => { cpu.Register.C = cpu.Bus.Data; cpu.Register.SP++; cpu.Bus.Address = cpu.Register.SP; } },
-            { @"DE", (cpu) => { cpu.Register.E = cpu.Bus.Data; cpu.Register.SP++; cpu.Bus.Address = cpu.Register.SP; } },
-            { @"HL", (cpu) => { cpu.Register.L = cpu.Bus.Data; cpu.Register.SP++; cpu.Bus.Address = cpu.Register.SP; } },
-            { @"AF", (cpu) => { cpu.Register.F = cpu.Bus.Data; cpu.Register.SP++; cpu.Bus.Address = cpu.Register.SP; } },
+            { @"BC", (cpu) => { cpu.Register.C = cpu.Bus.Data; cpu.Register.SP++; cpu.Register.Internal_Memory_Pointer = cpu.Register.SP; } },
+            { @"DE", (cpu) => { cpu.Register.E = cpu.Bus.Data; cpu.Register.SP++; cpu.Register.Internal_Memory_Pointer = cpu.Register.SP; } },
+            { @"HL", (cpu) => { cpu.Register.L = cpu.Bus.Data; cpu.Register.SP++; cpu.Register.Internal_Memory_Pointer = cpu.Register.SP; } },
+            { @"AF", (cpu) => { cpu.Register.F = cpu.Bus.Data; cpu.Register.SP++; cpu.Register.Internal_Memory_Pointer = cpu.Register.SP; } },
         };
 
         private static Dictionary<string, Action<CPUZ80>> operandExecuterForRead2 = new Dictionary<string, Action<CPUZ80>>()
@@ -50,7 +50,7 @@ namespace AILZ80CPU.Operations
                 operationItem.ExecuterForFetch = (cpu) => 
                 {
                     cpu.Register.SP++;
-                    cpu.Bus.Address = cpu.Register.SP;
+                    cpu.Register.Internal_Memory_Pointer = cpu.Register.SP;
                 };
 
                 operationItem.ExecuterForRead1 = executer1;

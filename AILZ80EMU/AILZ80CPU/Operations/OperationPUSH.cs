@@ -43,14 +43,14 @@ namespace AILZ80CPU.Operations
                 operationItem.ExecuterForFetch = executer;
                 operationItem.ExecuterForWrite1 = (cpu) =>
                 {
-                    cpu.Register.SP--; 
-                    cpu.Bus.Address = cpu.Register.SP;
+                    cpu.Register.SP--;
+                    cpu.Register.Internal_Memory_Pointer = cpu.Register.SP;
                     cpu.Bus.Data = cpu.Register.Internal_16bit_Register_H;
                 };
                 operationItem.ExecuterForWrite2 = (cpu) =>
                 {
                     cpu.Register.SP--;
-                    cpu.Bus.Address = cpu.Register.SP;
+                    cpu.Register.Internal_Memory_Pointer = cpu.Register.SP;
                     cpu.Bus.Data = cpu.Register.Internal_16bit_Register_L;
                 };
                 return operationItem;

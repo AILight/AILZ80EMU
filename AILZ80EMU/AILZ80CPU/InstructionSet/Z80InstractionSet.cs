@@ -259,10 +259,10 @@ namespace AILZ80CPU.InstructionSet
                 new InstructionItem("Restart", OpCodeEnum.RST, "p", new []{ "11ttt111" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1, MachineCycleEnum.MemoryWrite, MachineCycleEnum.MemoryWrite }),
 
                 // Input and Output Instructions
-                new InstructionItem("A ← (n)", OpCodeEnum.IN, "A, (n)", new []{ "11011011", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.Process_1 }),
-                new InstructionItem("(n) ← A", OpCodeEnum.OUT, "(n), A", new []{ "11010011", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_1 }),
-                new InstructionItem("A ← (C)", OpCodeEnum.IN, "A, (C)", new []{ "11110011" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1 }),
-                new InstructionItem("(C) ← A", OpCodeEnum.OUT, "(C), A", new []{ "11110001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.Process_1 }),
+                new InstructionItem("A ← (n)", OpCodeEnum.IN, "A, (n)", new []{ "11011011", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.IORead }),
+                new InstructionItem("(n) ← A", OpCodeEnum.OUT, "(n), A", new []{ "11010011", "nnnnnnnn" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryWrite, MachineCycleEnum.IORead }),
+                new InstructionItem("r ← (C)", OpCodeEnum.IN, "r, (C)", new []{ "11101101", "01rrr000" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.IOWrite }),
+                new InstructionItem("(C) ← r", OpCodeEnum.OUT, "(C), r", new []{ "11101101", "01rrr001" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.IOWrite }),
 
                 // Block Input and Output Instructions
                 new InstructionItem("(C) ← A, B ← B - 1", OpCodeEnum.OUTI, "", new []{ "11101101", "10110011" }, new[] { MachineCycleEnum.OpcodeFetch, MachineCycleEnum.OpcodeFetch, MachineCycleEnum.MemoryRead, MachineCycleEnum.MemoryWrite, MachineCycleEnum.Process_1 }),
